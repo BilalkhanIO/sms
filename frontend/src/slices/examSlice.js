@@ -1,43 +1,74 @@
 // slices/examSlice.js
-import { createSlice } from '@reduxjs/toolkit';
-import { examService } from '../services/examService';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import examService from '../services/examService';
 
 const initialState = {
   exams: [],
-  loading: false,
-  error: null,
+  isLoading: false,
+  isSuccess: false,
+  isError: false,
+  errorMessage: '',
 };
+
+export const getExams = createAsyncThunk(
+  'exam/getAll',
+  async (classId, thunkAPI) => {
+    try {
+      return await examService.getExams(classId);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const createExam = createAsyncThunk(
+  'exam/create',
+  async (examData, thunkAPI) => {
+    try {
+      return await examService.createExam(examData);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const examSlice = createSlice({
   name: 'exam',
   initialState,
-  reducers: {},
+  reducers: {
+    reset: (state) => initialState,
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(examService.createExam.pending, (state) => {
-        state.loading = true;
+      .addCase(getExams.pending, (state) => {
+        state.isLoading = true;
       })
-      .addCase(examService.createExam.fulfilled, (state, action) => {
-        state.loading = false;
-        state.exams.push(action.payload);
-      })
-      .addCase(examService.createExam.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
-      })
-      .addCase(examService.getExams.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(examService.getExams.fulfilled, (state, action) => {
-        state.loading = false;
+      .addCase(getExams.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
         state.exams = action.payload;
       })
-      .addCase(examService.getExams.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
+      .addCase(getExams.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.payload.message;
+      })
+      .addCase(createExam.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(createExam.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.exams.push(action.payload);
+      })
+      .addCase(createExam.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.payload.message;
       });
   },
 });
 
+export const { reset } = examSlice.actions;
 export default examSlice.reducer;
 

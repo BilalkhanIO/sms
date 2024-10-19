@@ -1,56 +1,46 @@
-//controllers/gradeController
+// controllers/gradeController.js
 import asyncHandler from 'express-async-handler';
 import Grade from '../models/Grade.js';
 
-// @desc    Get grades
-// @route   GET /api/grades
-// @access  Private
-const getGrades = asyncHandler(async (req, res) => {
-  const { studentId, classId } = req.query;
-  const filter = {};
-  if (studentId) filter.student = studentId;
-  if (classId) filter.class = classId;
-
-  const grades = await Grade.find(filter)
-    .populate('class', 'name')
-    .populate('student', 'name');
-  res.json(grades);
-});
-
-// @desc    Add a grade
-// @route   POST /api/grades
-// @access  Private/Teacher/Admin
-const addGrade = asyncHandler(async (req, res) => {
-  const { classId, studentId, assignmentName, score } = req.body;
+const createGrade = asyncHandler(async (req, res) => {
+  const { class: classId, assignmentName, grades, totalPoints, dueDate } = req.body;
 
   const grade = await Grade.create({
     class: classId,
-    student: studentId,
     assignmentName,
-    score
+    grades,
+    totalPoints,
+    dueDate,
   });
 
   res.status(201).json(grade);
 });
 
-// @desc    Update a grade
-// @route   PUT /api/grades/:id
-// @access  Private/Teacher/Admin
+const getGrades = asyncHandler(async (req, res) => {
+  const { classId } = req.query;
+
+  const grades = await Grade.find({ class: classId })
+    .populate('class', 'name')
+    .populate('grades.student', 'name');
+
+  res.json(grades);
+});
+
 const updateGrade = asyncHandler(async (req, res) => {
-  const { assignmentName, score } = req.body;
+  const { id } = req.params;
+  const { grades } = req.body;
 
-  const grade = await Grade.findById(req.params.id);
+  const grade = await Grade.findById(id);
 
-  if (grade) {
-    grade.assignmentName = assignmentName || grade.assignmentName;
-    grade.score = score || grade.score;
-
-    const updatedGrade = await grade.save();
-    res.json(updatedGrade);
-  } else {
+  if (!grade) {
     res.status(404);
     throw new Error('Grade not found');
   }
+
+  grade.grades = grades;
+  await grade.save();
+
+  res.json(grade);
 });
 
-export { getGrades, addGrade, updateGrade };
+export { createGrade, getGrades, updateGrade };

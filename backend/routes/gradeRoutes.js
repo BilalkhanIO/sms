@@ -1,15 +1,12 @@
-//routes/gradeRoutes
+// routes/gradeRoutes.js
 import express from 'express';
-import { getGrades, addGrade, updateGrade } from '../controllers/gradeController.js';
+import { createGrade, getGrades, updateGrade } from '../controllers/gradeController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.route('/')
-  .get(protect, getGrades)
-  .post(protect, authorize('teacher', 'admin'), addGrade);
-
-router.route('/:id')
-  .put(protect, authorize('teacher', 'admin'), updateGrade);
+router.post('/', protect, authorize('teacher'), createGrade);
+router.get('/', protect, getGrades);
+router.put('/:id', protect, authorize('teacher'), updateGrade);
 
 export default router;

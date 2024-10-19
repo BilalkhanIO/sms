@@ -1,29 +1,13 @@
 // controllers/authController.js
 import asyncHandler from 'express-async-handler';
-import jwt from 'jsonwebtoken';
+import generateToken from '../utils/generateToken.js';
 import User from '../models/User.js';
-
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '15m', // Short-lived access token
-  });
-};
-
-const generateRefreshToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: '7d',
-  });
-};
+import sendEmail from '../utils/sendEmail.js';
+import crypto from 'crypto';
 
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
 
-  if (!name || !email || !password) {
-    res.status(400);
-    throw new Error('Please add all fields');
-  }
-
-  // Check if user exists
   const userExists = await User.findOne({ email });
 
   if (userExists) {
@@ -31,25 +15,20 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
-  // Create user
   const user = await User.create({
     name,
     email,
     password,
-    role: role || 'student',
+    role,
   });
 
   if (user) {
-    const accessToken = generateToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-
     res.status(201).json({
-      _id: user.id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      accessToken,
-      refreshToken,
+      token: generateToken(user._id),
     });
   } else {
     res.status(400);
@@ -60,20 +39,20 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  // Check for user email
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select('+password');
 
-  if (user && (await user.matchPassword(password))) {
-    const accessToken = generateToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
 
+  if (await user.matchPassword(password)) {
     res.json({
-      _id: user.id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      accessToken,
-      refreshToken,
+      token: generateToken(user._id),
     });
   } else {
     res.status(401);
@@ -81,33 +60,84 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
-const refreshToken = asyncHandler(async (req, res) => {
-  const { refreshToken } = req.body;
+const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
 
-  if (!refreshToken) {
-    res.status(401);
-    throw new Error('Refresh token is required');
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
   }
+});
+
+const forgotPassword = asyncHandler(async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+
+  if (!user) {
+    res.status(404);
+    throw new Error('There is no user with that email');
+  }
+
+  const resetToken = user.getResetPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+
+  const resetUrl = `${req.protocol}://${req.get('host')}/api/auth/resetpassword/${resetToken}`;
+
+  const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
+    await sendEmail({
+      email: user.email,
+      subject: 'Password reset token',
+      message,
+    });
 
-    if (!user) {
-      res.status(404);
-      throw new Error('User not found');
-    }
+    res.status(200).json({ success: true, data: 'Email sent' });
+  } catch (err) {
+    console.log(err);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
 
-    const accessToken = generateToken(user._id);
-    res.json({ accessToken });
-  } catch (error) {
-    res.status(401);
-    throw new Error('Invalid refresh token');
+    await user.save({ validateBeforeSave: false });
+
+    res.status(500);
+    throw new Error('Email could not be sent');
   }
 });
 
-const getMe = asyncHandler(async (req, res) => {
-  res.status(200).json(req.user);
+const resetPassword = asyncHandler(async (req, res) => {
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(req.params.resettoken)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    res.status(400);
+    throw new Error('Invalid token');
+  }
+
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    data: 'Password updated success',
+    token: generateToken(user._id),
+  });
 });
 
-export { registerUser, loginUser, refreshToken, getMe };
+export { registerUser, loginUser, getUserProfile, forgotPassword, resetPassword };

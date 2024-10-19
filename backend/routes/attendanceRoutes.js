@@ -1,12 +1,11 @@
-//routes/attendanceRoutes
+// routes/attendanceRoutes.js
 import express from 'express';
-import { getAttendance, markAttendance } from '../controllers/attendanceController.js';
+import { markAttendance, getAttendance } from '../controllers/attendanceController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.route('/')
-  .get(protect, getAttendance)
-  .post(protect, authorize('teacher', 'admin'), markAttendance);
+router.post('/', protect, authorize('teacher'), markAttendance);
+router.get('/', protect, getAttendance);
 
 export default router;

@@ -1,86 +1,63 @@
+// src/pages/Login.js
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { login, reset } from '../slices/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { login } from '../slices/authSlice';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
-  const { email, password } = formData;
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const dispatch = useDispatch();
-  const history = useHistory();
-
-  const { user, isLoading, isError, isSuccess, message } = useSelector(
-    (state) => state.auth
-  );
+  const navigate = useNavigate();
+  const { isLoading, error, user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (isSuccess || user) {
-      history.push('/dashboard');
-    }
+    console.log('Current user state:', user);
+  }, [user]);
 
-    dispatch(reset());
-  }, [user, isSuccess, history, dispatch]);
-
-  const onChange = (e) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const onSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const userData = {
-      email,
-      password,
-    };
-    dispatch(login(userData));
+    try {
+      const result = await dispatch(login({ email, password })).unwrap();
+      if (result) {
+        console.log('Login successful, navigating to dashboard');
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      // You might want to set an error state here to display to the user
+    }
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
-    <div className="max-w-md mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Login</h1>
-      {isError && <p className="text-red-500 mb-4">{message}</p>}
-      <form onSubmit={onSubmit}>
-        <div className="mb-4">
-          <label htmlFor="email" className="block mb-2">
-            Email
-          </label>
+    <div className="max-w-md mx-auto mt-10">
+      <h2 className="text-2xl font-bold mb-5">Login</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block mb-1">Email</label>
           <input
             type="email"
             id="email"
-            name="email"
             value={email}
-            onChange={onChange}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border rounded"
             required
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block mb-2">
-            Password
-          </label>
+        <div>
+          <label htmlFor="password" className="block mb-1">Password</label>
           <input
             type="password"
             id="password"
-            name="password"
             value={password}
-            onChange={onChange}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2 border rounded"
             required
           />
         </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Login
+        {error && <p className="text-red-500">{error}</p>}
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
         </button>
       </form>
     </div>
