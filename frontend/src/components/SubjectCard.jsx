@@ -1,14 +1,25 @@
 import React from 'react';
-import { ClassSchedule } from '../components';
 
-const SubjectCard = ({ subject }) => (
-  <div className="mb-4 p-4 border rounded">
-    <h4 className="text-lg font-semibold">{subject.name}</h4>
-    <p><strong>Teacher:</strong> {subject.teacher}</p>
-    <h5 className="font-semibold mt-2">Schedule:</h5>
-    <ClassSchedule schedule={subject.schedule} />
-  </div>
-);
+const SubjectCard = ({ subject, onRemove }) => {
+  return (
+    <div className="bg-gray-100 p-4 rounded-lg mb-4 flex justify-between items-center">
+      <div>
+        <h4 className="font-semibold">{subject.name}</h4>
+        <p>Teacher: {subject.teacher.name}</p>
+        {subject.schedule && subject.schedule.map((sch, index) => (
+          <p key={index}>
+            {sch.day}: {sch.startTime} - {sch.endTime}
+          </p>
+        ))}
+      </div>
+      <button
+        onClick={onRemove}
+        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+      >
+        Remove
+      </button>
+    </div>
+  );
+};
 
 export default SubjectCard;
-
