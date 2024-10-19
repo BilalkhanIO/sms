@@ -130,7 +130,7 @@ const ClassDetails = () => {
     return <ErrorMessage message={error} />;
   }
 
-  if (!selectedClass) return null;
+  if (!selectedClass) return <LoadingSpinner />;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -140,13 +140,17 @@ const ClassDetails = () => {
         <p className="mb-4"><strong>Batch:</strong> {selectedClass.batchStartYear} - {selectedClass.batchEndYear}</p>
         
         <h3 className="text-xl font-semibold mt-6 mb-4">Subjects</h3>
-        {selectedClass.subjects.map((subject) => (
-          <SubjectCard 
-            key={subject._id} 
-            subject={subject} 
-            onRemove={() => handleRemoveSubject(subject._id)}
-          />
-        ))}
+        {selectedClass.subjects && selectedClass.subjects.length > 0 ? (
+          selectedClass.subjects.map((subject) => (
+            <SubjectCard 
+              key={subject._id} 
+              subject={subject} 
+              onRemove={() => handleRemoveSubject(subject._id)}
+            />
+          ))
+        ) : (
+          <p>No subjects available for this class.</p>
+        )}
         
         <h3 className="text-xl font-semibold mt-6 mb-4">Add Subject</h3>
         <div className="flex mb-4">
