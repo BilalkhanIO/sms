@@ -32,7 +32,7 @@ const getClassDetails = async (id) => {
     },
   };
   try {
-    const response = await axios.get(`${API_URL}${id}`, config);
+    const response = await axios.get(`${API_URL}/${id}`, config);
     return response.data;
   } catch (error) {
     handleAuthError(error);
