@@ -35,9 +35,11 @@ const fileSlice = createSlice({
       .addCase(fileService.getFiles.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+      })
+      .addCase(fileService.downloadFile.rejected, (state, action) => {
+        state.error = action.error.message;
       });
   },
 });
 
 export default fileSlice.reducer;
-

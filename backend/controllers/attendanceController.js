@@ -1,4 +1,4 @@
-//controllers/attendanceController
+// controllers/attendanceController.js
 import asyncHandler from 'express-async-handler';
 import Attendance from '../models/Attendance.js';
 
@@ -13,21 +13,24 @@ const getAttendance = asyncHandler(async (req, res) => {
 
   const attendance = await Attendance.find(filter)
     .populate('class', 'name')
-    .populate('student', 'name');
+    .populate('attendanceData.student', 'name');
   res.json(attendance);
 });
 
-// @desc    Mark attendance
+// @desc    Record attendance
 // @route   POST /api/attendance
-// @access  Private/Teacher/Admin
+// @access  Private/Teacher
 const markAttendance = asyncHandler(async (req, res) => {
-  const { classId, studentId, date, status } = req.body;
+  const { classId, date, attendanceData } = req.body;
 
   const attendance = await Attendance.findOneAndUpdate(
-    { class: classId, student: studentId, date: new Date(date) },
-    { status },
+    { class: classId, date: new Date(date) },
+    { attendanceData },
     { new: true, upsert: true }
   );
+
+  await attendance.populate('class', 'name');
+  await attendance.populate('attendanceData.student', 'name');
 
   res.status(201).json(attendance);
 });

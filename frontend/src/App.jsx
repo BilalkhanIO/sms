@@ -1,32 +1,62 @@
+// src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import store from './store';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import DashboardLayout from './components/DasboardLayout';
 import PrivateRoute from './components/PrivateRoute';
-import Navbar from './components/Navbar';
-import Home from './components/Home';
-import Login from './components/Login';
-import Register from './components/Register';
-import Dashboard from './components/Dashboard';
+import {
+  Login,
+  Register,
+  Dashboard,
+  Classes,
+  Exams,
+  Grades,
+  Attendance,
+  Notifications,
+  Users,
+  Home,
+  ClassDetails,
+} from './pages';
+import CreateClass from './components/CreateClass';
 
-const App = () => {
+function App() {
+  const { user, isLoading } = useSelector((state) => state.auth);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <Provider store={store}>
-      <Router>
-        <div className="min-h-screen bg-gray-100">
-          <Navbar />
-          <main className="container mx-auto px-4 py-8">
-            <Switch>
-              <Route exact path="/" component={Home} />
-              <Route path="/login" component={Login} />
-              <Route path="/register" component={Register} />
-              <PrivateRoute path="/dashboard" component={Dashboard} />
-            </Switch>
-          </main>
-        </div>
-      </Router>
-    </Provider>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Home />} />
+      {user ? (
+        <Route
+          path="/*"
+          element={
+            <PrivateRoute>
+              <DashboardLayout>
+                <Routes>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/classes" element={<Classes />} />
+                  <Route path="/exams" element={<Exams />} />
+                  <Route path="/grades" element={<Grades />} />
+                  {['admin', 'teacher'].includes(user.role) && (
+                    <Route path="/attendance" element={<Attendance />} />
+                  )}
+                  <Route path="/notifications" element={<Notifications />} />
+                  {user.role === 'admin' && <Route path="/users" element={<Users />} />}
+                  <Route path="/create-class" element={<CreateClass />} />
+                  <Route path="/classes/:id" element={<ClassDetails />} />
+                </Routes>
+              </DashboardLayout>
+            </PrivateRoute>
+          }
+        />
+      ) : null}
+    </Routes>
   );
-};
+}
 
 export default App;

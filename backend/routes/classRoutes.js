@@ -1,18 +1,12 @@
 // routes/classRoutes.js
 import express from 'express';
-import { getClasses, createClass, updateClass, deleteClass } from '../controllers/classController.js';
+import { createClass, getClasses, getClassDetails } from '../controllers/classController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.use(protect);
-
-router.route('/')
-  .get(getClasses)
-  .post(authorize('admin'), createClass);
-
-router.route('/:id')
-  .put(authorize('admin'), updateClass)
-  .delete(authorize('admin'), deleteClass);
+router.post('/', protect, authorize('admin', 'teacher'), createClass);
+router.get('/', protect, getClasses);
+router.get('/:id', protect, getClassDetails);
 
 export default router;
