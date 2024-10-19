@@ -8,11 +8,10 @@ const ClassCard = ({ cls }) => (
     className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
   >
     <h3 className="text-xl font-semibold mb-3">{cls.name}</h3>
-    <p className="mb-2">Teacher: {cls.teacher.name}</p>
-    <p className="mb-4">Students: {cls.students.length}</p>
-    <ClassSchedule schedule={cls.schedule} />
+    <p className="mb-2">Teacher: {cls.teacher?.name || 'Not assigned'}</p>
+    <p className="mb-4">Students: {cls.students?.length || 0}</p>
+    {cls.schedule && <ClassSchedule schedule={cls.schedule} />}
   </Link>
 );
 
 export default ClassCard;
-

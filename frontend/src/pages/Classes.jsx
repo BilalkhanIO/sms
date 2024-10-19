@@ -70,9 +70,7 @@ const Classes = () => {
         <p className="text-center">No classes found.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredClasses.map((cls) => (
-            <ClassCard key={cls._id} cls={cls} />
-          ))}
+          {filteredClasses.map((cls) => cls && <ClassCard key={cls._id} cls={cls} />)}
         </div>
       )}
     </div>
