@@ -12,15 +12,11 @@ const initialState = {
 
 export const getClasses = createAsyncThunk(
   'class/getClasses',
-  async (_, thunkAPI) => {
+  async (_, { rejectWithValue }) => {
     try {
       return await classService.getClasses();
     } catch (error) {
-      if (error.message === 'No authentication token found' || 
-          error.message === 'Authentication failed. Please log in again.') {
-        thunkAPI.dispatch(logout());
-      }
-      return thunkAPI.rejectWithValue(error.message);
+      return rejectWithValue(error.response.data);
     }
   }
 );
@@ -143,6 +139,7 @@ const classSlice = createSlice({
     builder
       .addCase(getClasses.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(getClasses.fulfilled, (state, action) => {
         state.isLoading = false;

@@ -39,7 +39,6 @@ const Classes = () => {
             <ClassCard cls={cls} />
           </Link>
         ))}
-        
       </div>
     </div>
   );
