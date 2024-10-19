@@ -1,17 +1,16 @@
 // models/Class.js
 import mongoose from 'mongoose';
-import User from './User.js';
+
+const scheduleSchema = mongoose.Schema({
+  day: { type: String, required: true },
+  startTime: { type: String, required: true },
+  endTime: { type: String, required: true },
+});
 
 const subjectSchema = mongoose.Schema({
   name: { type: String, required: true },
-  teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  schedule: [
-    {
-      day: { type: String, required: true },
-      startTime: { type: String, required: true },
-      endTime: { type: String, required: true },
-    },
-  ],
+  teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  schedule: [scheduleSchema],
 });
 
 const classSchema = mongoose.Schema({

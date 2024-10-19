@@ -73,4 +73,60 @@ const getClassDetails = asyncHandler(async (req, res) => {
   }
 });
 
-export { createClass, getClasses, getClassDetails };
+const addStudent = asyncHandler(async (req, res) => {
+  const { classId, studentId } = req.body;
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $addToSet: { students: studentId } },
+    { new: true }
+  ).populate('students', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+  res.json(updatedClass);
+});
+
+const removeStudent = asyncHandler(async (req, res) => {
+  const { classId, studentId } = req.body;
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $pull: { students: studentId } },
+    { new: true }
+  ).populate('students', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+  res.json(updatedClass);
+});
+
+const addSubject = asyncHandler(async (req, res) => {
+  const { classId, subject } = req.body;
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $push: { subjects: subject } },
+    { new: true }
+  ).populate('subjects.teacher', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+  res.json(updatedClass);
+});
+
+const removeSubject = asyncHandler(async (req, res) => {
+  const { classId, subjectId } = req.body;
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $pull: { subjects: { _id: subjectId } } },
+    { new: true }
+  ).populate('subjects.teacher', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+  res.json(updatedClass);
+});
+
+export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject };

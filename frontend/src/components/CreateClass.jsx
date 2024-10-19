@@ -41,19 +41,37 @@ const CreateClass = () => {
 
   const handleSubjectChange = (index, field, value) => {
     const newSubjects = [...classData.subjects];
-    newSubjects[index][field] = value;
+    newSubjects[index] = { ...newSubjects[index], [field]: value };
     setClassData({ ...classData, subjects: newSubjects });
   };
 
   const addSubject = () => {
     setClassData({
       ...classData,
-      subjects: [...classData.subjects, { name: '', teacher: '' }]
+      subjects: [...classData.subjects, { name: '', teacher: '', schedule: [] }],
     });
   };
 
   const removeSubject = (index) => {
     const newSubjects = classData.subjects.filter((_, i) => i !== index);
+    setClassData({ ...classData, subjects: newSubjects });
+  };
+
+  const addSchedule = (subjectIndex) => {
+    const newSubjects = [...classData.subjects];
+    newSubjects[subjectIndex].schedule.push({ day: '', startTime: '', endTime: '' });
+    setClassData({ ...classData, subjects: newSubjects });
+  };
+
+  const removeSchedule = (subjectIndex, scheduleIndex) => {
+    const newSubjects = [...classData.subjects];
+    newSubjects[subjectIndex].schedule = newSubjects[subjectIndex].schedule.filter((_, i) => i !== scheduleIndex);
+    setClassData({ ...classData, subjects: newSubjects });
+  };
+
+  const handleScheduleChange = (subjectIndex, scheduleIndex, field, value) => {
+    const newSubjects = [...classData.subjects];
+    newSubjects[subjectIndex].schedule[scheduleIndex][field] = value;
     setClassData({ ...classData, subjects: newSubjects });
   };
 
@@ -65,26 +83,15 @@ const CreateClass = () => {
     }
 
     for (const subject of classData.subjects) {
-      if (!subject.name || !subject.teacher) {
-        alert('Each subject must have a name and a teacher assigned');
+      if (!subject.name || !subject.teacher || subject.schedule.length === 0) {
+        alert('Each subject must have a name, a teacher assigned, and at least one schedule');
         return;
       }
     }
 
     try {
-      const classDataToSend = {
-        ...classData,
-        batchStartYear: parseInt(classData.batchStartYear),
-        batchEndYear: parseInt(classData.batchEndYear),
-        subjects: classData.subjects.map(subject => ({
-          name: subject.name,
-          teacher: subject.teacher
-        }))
-      };
-      console.log('Sending class data:', JSON.stringify(classDataToSend, null, 2));
-      const result = await dispatch(createClass(classDataToSend)).unwrap();
-      console.log('Class creation result:', result);
-      navigate('/classes');
+      const result = await dispatch(createClass(classData)).unwrap();
+      navigate(`/classes/${result._id}`);
     } catch (error) {
       console.error('Failed to create class:', error);
       alert(`Failed to create class: ${error.message || 'Unknown error'}`);

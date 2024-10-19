@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getClassDetails } from '../slices/classSlice';
+import { getClassDetails, addStudent, removeStudent, addSubject, removeSubject } from '../slices/classSlice';
 import { logout } from '../slices/authSlice';
 import ClassSchedule from '../components/ClassSchedule';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -14,10 +14,50 @@ const ClassDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { selectedClass, isLoading, error } = useSelector((state) => state.class);
+  const [newStudentId, setNewStudentId] = useState('');
+  const [newSubject, setNewSubject] = useState({ name: '', teacher: '' });
 
   useEffect(() => {
     dispatch(getClassDetails(id));
   }, [dispatch, id]);
+
+  const handleAddStudent = async () => {
+    if (newStudentId) {
+      try {
+        await dispatch(addStudent({ classId: id, studentId: newStudentId })).unwrap();
+        setNewStudentId('');
+      } catch (error) {
+        alert(`Failed to add student: ${error.message}`);
+      }
+    }
+  };
+
+  const handleRemoveStudent = async (studentId) => {
+    try {
+      await dispatch(removeStudent({ classId: id, studentId })).unwrap();
+    } catch (error) {
+      alert(`Failed to remove student: ${error.message}`);
+    }
+  };
+
+  const handleAddSubject = async () => {
+    if (newSubject.name && newSubject.teacher) {
+      try {
+        await dispatch(addSubject({ classId: id, subject: newSubject })).unwrap();
+        setNewSubject({ name: '', teacher: '' });
+      } catch (error) {
+        alert(`Failed to add subject: ${error.message}`);
+      }
+    }
+  };
+
+  const handleRemoveSubject = async (subjectId) => {
+    try {
+      await dispatch(removeSubject({ classId: id, subjectId })).unwrap();
+    } catch (error) {
+      alert(`Failed to remove subject: ${error.message}`);
+    }
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -57,6 +97,61 @@ const ClassDetails = () => {
         ))}
         <h3 className="text-xl font-semibold mt-6 mb-4">Students</h3>
         <StudentList students={selectedClass.students} />
+        <h3 className="text-xl font-semibold mt-6 mb-4">Add Student</h3>
+        <div className="flex mb-4">
+          <input
+            type="text"
+            value={newStudentId}
+            onChange={(e) => setNewStudentId(e.target.value)}
+            placeholder="Student ID"
+            className="flex-grow px-3 py-2 border rounded-l"
+          />
+          <button
+            onClick={handleAddStudent}
+            className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
+          >
+            Add Student
+          </button>
+        </div>
+
+        <h3 className="text-xl font-semibold mt-6 mb-4">Students</h3>
+        <StudentList
+          students={selectedClass.students}
+          onRemoveStudent={handleRemoveStudent}
+        />
+
+        <h3 className="text-xl font-semibold mt-6 mb-4">Add Subject</h3>
+        <div className="flex mb-4">
+          <input
+            type="text"
+            value={newSubject.name}
+            onChange={(e) => setNewSubject({ ...newSubject, name: e.target.value })}
+            placeholder="Subject Name"
+            className="flex-grow px-3 py-2 border rounded-l"
+          />
+          <input
+            type="text"
+            value={newSubject.teacher}
+            onChange={(e) => setNewSubject({ ...newSubject, teacher: e.target.value })}
+            placeholder="Teacher ID"
+            className="flex-grow px-3 py-2 border"
+          />
+          <button
+            onClick={handleAddSubject}
+            className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
+          >
+            Add Subject
+          </button>
+        </div>
+
+        <h3 className="text-xl font-semibold mt-6 mb-4">Subjects</h3>
+        {selectedClass.subjects.map((subject, index) => (
+          <SubjectCard
+            key={index}
+            subject={subject}
+            onRemoveSubject={() => handleRemoveSubject(subject._id)}
+          />
+        ))}
       </div>
     </div>
   );

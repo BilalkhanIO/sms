@@ -74,10 +74,34 @@ const handleAuthError = (error) => {
   throw error;
 };
 
+const addStudent = async (data) => {
+  const response = await axios.post(`${API_URL}/add-student`, data, getConfig());
+  return response.data;
+};
+
+const removeStudent = async (data) => {
+  const response = await axios.post(`${API_URL}/remove-student`, data, getConfig());
+  return response.data;
+};
+
+const addSubject = async (data) => {
+  const response = await axios.post(`${API_URL}/add-subject`, data, getConfig());
+  return response.data;
+};
+
+const removeSubject = async (data) => {
+  const response = await axios.post(`${API_URL}/remove-subject`, data, getConfig());
+  return response.data;
+};
+
 const classService = {
   getClasses,
   getClassDetails,
   createClass,
+  addStudent,
+  removeStudent,
+  addSubject,
+  removeSubject,
 };
 
 export default classService;
