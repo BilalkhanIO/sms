@@ -16,6 +16,7 @@ const CreateClass = () => {
     subjects: []
   });
   const [teachers, setTeachers] = useState([]);
+  const [schedule, setSchedule] = useState([]);
 
   useEffect(() => {
     const fetchTeachers = async () => {
@@ -57,22 +58,26 @@ const CreateClass = () => {
     setClassData({ ...classData, subjects: newSubjects });
   };
 
-  const addSchedule = (subjectIndex) => {
-    const newSubjects = [...classData.subjects];
-    newSubjects[subjectIndex].schedule.push({ day: '', startTime: '', endTime: '' });
-    setClassData({ ...classData, subjects: newSubjects });
+  const addScheduleItem = () => {
+    setSchedule([...schedule, { day: '', subjects: [] }]);
   };
 
-  const removeSchedule = (subjectIndex, scheduleIndex) => {
-    const newSubjects = [...classData.subjects];
-    newSubjects[subjectIndex].schedule = newSubjects[subjectIndex].schedule.filter((_, i) => i !== scheduleIndex);
-    setClassData({ ...classData, subjects: newSubjects });
+  const updateScheduleItem = (index, field, value) => {
+    const newSchedule = [...schedule];
+    newSchedule[index][field] = value;
+    setSchedule(newSchedule);
   };
 
-  const handleScheduleChange = (subjectIndex, scheduleIndex, field, value) => {
-    const newSubjects = [...classData.subjects];
-    newSubjects[subjectIndex].schedule[scheduleIndex][field] = value;
-    setClassData({ ...classData, subjects: newSubjects });
+  const addSubjectToSchedule = (scheduleIndex) => {
+    const newSchedule = [...schedule];
+    newSchedule[scheduleIndex].subjects.push({ subject: '', startTime: '', endTime: '' });
+    setSchedule(newSchedule);
+  };
+
+  const updateSubjectInSchedule = (scheduleIndex, subjectIndex, field, value) => {
+    const newSchedule = [...schedule];
+    newSchedule[scheduleIndex].subjects[subjectIndex][field] = value;
+    setSchedule(newSchedule);
   };
 
   const handleSubmit = async (e) => {

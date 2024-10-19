@@ -5,7 +5,7 @@ const SubjectCard = ({ subject, onRemove }) => {
     <div className="bg-gray-100 p-4 rounded-lg mb-4 flex justify-between items-center">
       <div>
         <h4 className="font-semibold">{subject.name}</h4>
-        <p>Teacher: {subject.teacher.name}</p>
+        <p>Teacher: {subject.teacher ? subject.teacher.name : 'Not assigned'}</p>
         {subject.schedule && subject.schedule.map((sch, index) => (
           <p key={index}>
             {sch.day}: {sch.startTime} - {sch.endTime}

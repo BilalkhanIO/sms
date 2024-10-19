@@ -129,4 +129,60 @@ const removeSubject = asyncHandler(async (req, res) => {
   res.json(updatedClass);
 });
 
-export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject };
+const updateSubject = asyncHandler(async (req, res) => {
+  const { classId, subjectId, updates } = req.body;
+  const updatedClass = await Class.findOneAndUpdate(
+    { _id: classId, 'subjects._id': subjectId },
+    { $set: { 'subjects.$': updates } },
+    { new: true }
+  ).populate('subjects.teacher', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class or subject not found');
+  }
+  res.json(updatedClass);
+});
+
+const assignTeacher = asyncHandler(async (req, res) => {
+  const { classId, subjectId, teacherId } = req.body;
+  const updatedClass = await Class.findOneAndUpdate(
+    { _id: classId, 'subjects._id': subjectId },
+    { $set: { 'subjects.$.teacher': teacherId } },
+    { new: true }
+  ).populate('subjects.teacher', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class or subject not found');
+  }
+  res.json(updatedClass);
+});
+
+const removeTeacher = asyncHandler(async (req, res) => {
+  const { classId, subjectId } = req.body;
+  const updatedClass = await Class.findOneAndUpdate(
+    { _id: classId, 'subjects._id': subjectId },
+    { $unset: { 'subjects.$.teacher': '' } },
+    { new: true }
+  ).populate('subjects.teacher', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class or subject not found');
+  }
+  res.json(updatedClass);
+});
+
+const updateSchedule = asyncHandler(async (req, res) => {
+  const { classId, schedule } = req.body;
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $set: { schedule: schedule } },
+    { new: true }
+  ).populate('subjects.teacher', 'name');
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+  res.json(updatedClass);
+});
+
+export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule };

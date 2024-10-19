@@ -20,6 +20,14 @@ const classSchema = mongoose.Schema({
   batchEndYear: { type: Number, required: true },
   subjects: [subjectSchema],
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  schedule: [{
+    day: String,
+    subjects: [{
+      subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
+      startTime: String,
+      endTime: String
+    }]
+  }]
 });
 
 const Class = mongoose.model('Class', classSchema);

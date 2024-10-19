@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getClassDetails, addStudent, removeStudent, addSubject, removeSubject } from '../slices/classSlice';
+import { getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule } from '../slices/classSlice';
 import { logout } from '../slices/authSlice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
@@ -15,6 +15,8 @@ const ClassDetails = () => {
   const { selectedClass, isLoading, error } = useSelector((state) => state.class);
   const [newStudentId, setNewStudentId] = useState('');
   const [newSubject, setNewSubject] = useState({ name: '', teacher: '', schedule: [] });
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [editedSchedule, setEditedSchedule] = useState([]);
 
   useEffect(() => {
     dispatch(getClassDetails(id));
@@ -65,6 +67,48 @@ const ClassDetails = () => {
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
+  };
+
+  const handleEditSchedule = () => {
+    setIsEditingSchedule(true);
+    setEditedSchedule(selectedClass.schedule || []);
+  };
+
+  const handleSaveSchedule = async () => {
+    try {
+      await dispatch(updateSchedule({ classId: id, schedule: editedSchedule })).unwrap();
+      setIsEditingSchedule(false);
+      dispatch(getClassDetails(id));
+    } catch (error) {
+      alert(`Failed to update schedule: ${error.message}`);
+    }
+  };
+
+  const handleUpdateSubject = async (subjectId, updates) => {
+    try {
+      await dispatch(updateSubject({ classId: id, subjectId, updates })).unwrap();
+      dispatch(getClassDetails(id));
+    } catch (error) {
+      alert(`Failed to update subject: ${error.message}`);
+    }
+  };
+
+  const handleAssignTeacher = async (subjectId, teacherId) => {
+    try {
+      await dispatch(assignTeacher({ classId: id, subjectId, teacherId })).unwrap();
+      dispatch(getClassDetails(id));
+    } catch (error) {
+      alert(`Failed to assign teacher: ${error.message}`);
+    }
+  };
+
+  const handleRemoveTeacher = async (subjectId) => {
+    try {
+      await dispatch(removeTeacher({ classId: id, subjectId })).unwrap();
+      dispatch(getClassDetails(id));
+    } catch (error) {
+      alert(`Failed to remove teacher: ${error.message}`);
+    }
   };
 
   if (isLoading) return <LoadingSpinner />;

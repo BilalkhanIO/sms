@@ -35,10 +35,11 @@ const Classes = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {classes.map((cls) => (
-          <Link to={`/class/${cls._id}`}>
-            <ClassCard key={cls._id} cls={cls} />
+          <Link key={cls._id} to={`/classes/${cls._id}`}>
+            <ClassCard cls={cls} />
           </Link>
         ))}
+        
       </div>
     </div>
   );
