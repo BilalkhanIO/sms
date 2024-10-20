@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import classService from '../services/classService';
 import { logout } from './authSlice';
+import axios from 'axios';
 
 const initialState = {
   classes: [],
@@ -131,6 +132,30 @@ export const updateSchedule = createAsyncThunk(
   }
 );
 
+export const getStudentDetails = createAsyncThunk(
+  'class/getStudentDetails',
+  async (studentId, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`/api/classes/student/${studentId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching student details:', error);
+      return rejectWithValue(error.response?.data || 'Failed to fetch student details');
+    }
+  }
+);
+
+export const updateClassStudents = createAsyncThunk(
+  'class/updateClassStudents',
+  async ({ classId, students }, { getState, dispatch }) => {
+    const { selectedClass } = getState().class;
+    if (selectedClass && selectedClass._id === classId) {
+      return { ...selectedClass, students };
+    }
+    return null;
+  }
+);
+
 const classSlice = createSlice({
   name: 'class',
   initialState,
@@ -199,7 +224,7 @@ const classSlice = createSlice({
       })
       .addCase(addSubject.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.classes.push(action.payload);
+        state.selectedClass = action.payload;
       })
       .addCase(addSubject.rejected, (state, action) => {
         state.isLoading = false;
@@ -210,11 +235,16 @@ const classSlice = createSlice({
       })
       .addCase(removeSubject.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.classes = action.payload;
+        state.selectedClass = action.payload;
       })
       .addCase(removeSubject.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(updateClassStudents.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.selectedClass = action.payload;
+        }
       })
       .addMatcher(
         (action) => action.type.endsWith('/fulfilled') && action.type !== 'class/getClassDetails/fulfilled',

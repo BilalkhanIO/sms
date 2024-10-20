@@ -2,6 +2,7 @@
 import asyncHandler from 'express-async-handler';
 import Class from '../models/Class.js';
 import mongoose from 'mongoose';
+import User from '../models/User.js';
 
 // @desc    Create a new class
 // @route   POST /api/classes
@@ -184,4 +185,16 @@ const updateSchedule = asyncHandler(async (req, res) => {
   res.json(updatedClass);
 });
 
-export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule };
+const getStudentDetails = asyncHandler(async (req, res) => {
+  const studentId = req.params.id;
+  const student = await User.findById(studentId).select('-password');
+  
+  if (student) {
+    res.json(student);
+  } else {
+    res.status(404);
+    throw new Error('Student not found');
+  }
+});
+
+export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule, getStudentDetails };

@@ -1,4 +1,4 @@
-# Logs
+#vite.config.js
 logs
 *.log
 npm-debug.log*
