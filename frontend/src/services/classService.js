@@ -13,7 +13,11 @@ const getClasses = async () => {
 };
 
 const getClassDetails = async (classId) => {
-  const response = await axios.get(API_URL + classId);
+  const token = localStorage.getItem('token');
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+  const response = await axios.get(`${API_URL}/${classId}`, config);
   return response.data;
 };
 
