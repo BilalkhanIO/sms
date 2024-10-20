@@ -7,9 +7,9 @@ import mongoose from 'mongoose';
 // @route   POST /api/classes
 // @access  Private (Admin, Teacher)
 const createClass = asyncHandler(async (req, res) => {
-  const { name, description, batchStartYear, batchEndYear, subjects } = req.body;
+  const { name, description, batchStartYear, batchEndYear, subjects, students } = req.body;
 
-  console.log('Received class data:', JSON.stringify({ name, description, batchStartYear, batchEndYear, subjects }, null, 2));
+  console.log('Received class data:', JSON.stringify({ name, description, batchStartYear, batchEndYear, subjects, students }, null, 2));
 
   if (!name || !batchStartYear || !batchEndYear || !subjects || subjects.length === 0) {
     console.log('Validation failed: Missing required fields');
@@ -26,8 +26,6 @@ const createClass = asyncHandler(async (req, res) => {
     throw new Error('Each subject must have a name and a valid teacher ID assigned');
   }
 
-  console.log('Received subjects:', JSON.stringify(subjects, null, 2));
-
   try {
     console.log('Attempting to create new class');
     const newClass = await Class.create({
@@ -36,6 +34,7 @@ const createClass = asyncHandler(async (req, res) => {
       batchStartYear,
       batchEndYear,
       subjects,
+      students
     });
 
     console.log('New class created:', JSON.stringify(newClass, null, 2));

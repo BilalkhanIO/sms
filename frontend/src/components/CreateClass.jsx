@@ -27,6 +27,7 @@ const CreateClass = () => {
           axios.get('/api/users?role=teacher', { headers: { Authorization: `Bearer ${token}` } }),
           axios.get('/api/users?role=student', { headers: { Authorization: `Bearer ${token}` } })
         ]);
+        console.log('Fetched students:', studentsResponse.data);
         setTeachers(teachersResponse.data);
         setStudents(studentsResponse.data);
       } catch (error) {
@@ -62,6 +63,7 @@ const CreateClass = () => {
   };
 
   const handleStudentChange = (selectedStudents) => {
+    console.log('Selected students:', selectedStudents);
     setClassData({ ...classData, students: selectedStudents });
   };
 
@@ -79,6 +81,8 @@ const CreateClass = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Submitting class data:', classData);
+    console.log('Submitting class data with students:', classData.students);
     if (!classData.name || !classData.batchStartYear || !classData.batchEndYear || classData.subjects.length === 0) {
       alert('Please fill in all required fields and add at least one subject');
       return;
@@ -111,6 +115,40 @@ const CreateClass = () => {
             id="name"
             name="name"
             value={classData.name}
+            onChange={handleInputChange}
+            required
+            className="w-full px-3 py-2 border rounded"
+          />
+        </div>
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            value={classData.description}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border rounded"
+          />
+        </div>
+        <div>
+          <label htmlFor="batchStartYear" className="block text-sm font-medium text-gray-700">Batch Start Year</label>
+          <input
+            type="text"
+            id="batchStartYear"
+            name="batchStartYear"
+            value={classData.batchStartYear}
+            onChange={handleInputChange}
+            required
+            className="w-full px-3 py-2 border rounded"
+          />
+        </div>
+        <div>
+          <label htmlFor="batchEndYear" className="block text-sm font-medium text-gray-700">Batch End Year</label>
+          <input
+            type="text"
+            id="batchEndYear"
+            name="batchEndYear"
+            value={classData.batchEndYear}
             onChange={handleInputChange}
             required
             className="w-full px-3 py-2 border rounded"
