@@ -17,8 +17,11 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 
+// Trust the first proxy
+app.set('trust proxy', 1);
+
 // Middleware
-app.use(cors(config.corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan('dev'));

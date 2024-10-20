@@ -12,26 +12,22 @@ const initialState = {
 
 export const getClasses = createAsyncThunk(
   'class/getClasses',
-  async (_, thunkAPI) => {
+  async (_, { rejectWithValue }) => {
     try {
       return await classService.getClasses();
     } catch (error) {
-      if (error.message === 'No authentication token found' || 
-          error.message === 'Authentication failed. Please log in again.') {
-        thunkAPI.dispatch(logout());
-      }
-      return thunkAPI.rejectWithValue(error.message);
+      return rejectWithValue(error.response.data);
     }
   }
 );
 
 export const getClassDetails = createAsyncThunk(
   'class/getClassDetails',
-  async (id, thunkAPI) => {
+  async (classId, { rejectWithValue }) => {
     try {
-      return await classService.getClassDetails(id);
+      return await classService.getClassDetails(classId);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return rejectWithValue(error.response.data);
     }
   }
 );
@@ -47,6 +43,94 @@ export const createClass = createAsyncThunk(
   }
 );
 
+export const addStudent = createAsyncThunk(
+  'class/addStudent',
+  async ({ classId, studentId }, { rejectWithValue }) => {
+    try {
+      return await classService.addStudent(classId, studentId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const removeStudent = createAsyncThunk(
+  'class/removeStudent',
+  async ({ classId, studentId }, { rejectWithValue }) => {
+    try {
+      return await classService.removeStudent(classId, studentId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const addSubject = createAsyncThunk(
+  'class/addSubject',
+  async ({ classId, subject }, { rejectWithValue }) => {
+    try {
+      return await classService.addSubject(classId, subject);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const removeSubject = createAsyncThunk(
+  'class/removeSubject',
+  async ({ classId, subjectId }, { rejectWithValue }) => {
+    try {
+      return await classService.removeSubject(classId, subjectId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateSubject = createAsyncThunk(
+  'class/updateSubject',
+  async ({ classId, subjectId, updates }, { rejectWithValue }) => {
+    try {
+      return await classService.updateSubject(classId, subjectId, updates);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const assignTeacher = createAsyncThunk(
+  'class/assignTeacher',
+  async ({ classId, subjectId, teacherId }, { rejectWithValue }) => {
+    try {
+      return await classService.assignTeacher(classId, subjectId, teacherId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const removeTeacher = createAsyncThunk(
+  'class/removeTeacher',
+  async ({ classId, subjectId }, { rejectWithValue }) => {
+    try {
+      return await classService.removeTeacher(classId, subjectId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateSchedule = createAsyncThunk(
+  'class/updateSchedule',
+  async ({ classId, schedule }, { rejectWithValue }) => {
+    try {
+      return await classService.updateSchedule(classId, schedule);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const classSlice = createSlice({
   name: 'class',
   initialState,
@@ -55,6 +139,7 @@ const classSlice = createSlice({
     builder
       .addCase(getClasses.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(getClasses.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -66,6 +151,7 @@ const classSlice = createSlice({
       })
       .addCase(getClassDetails.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(getClassDetails.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -85,9 +171,64 @@ const classSlice = createSlice({
       .addCase(createClass.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(addStudent.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(addStudent.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.classes.push(action.payload);
+      })
+      .addCase(addStudent.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(removeStudent.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(removeStudent.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.classes = action.payload;
+      })
+      .addCase(removeStudent.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(addSubject.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(addSubject.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.classes.push(action.payload);
+      })
+      .addCase(addSubject.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(removeSubject.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(removeSubject.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.classes = action.payload;
+      })
+      .addCase(removeSubject.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addMatcher(
+        (action) => action.type.endsWith('/fulfilled') && action.type !== 'class/getClassDetails/fulfilled',
+        (state, action) => {
+          state.selectedClass = action.payload;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.endsWith('/rejected') && action.type !== 'class/getClassDetails/rejected',
+        (state, action) => {
+          state.error = action.payload;
+        }
+      );
   },
 });
 
 export default classSlice.reducer;
-

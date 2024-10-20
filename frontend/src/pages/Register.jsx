@@ -13,14 +13,17 @@ const Register = () => {
   const navigate = useNavigate();
   const { isLoading, error } = useSelector((state) => state.auth);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(register({ name, email, password, role })).then((result) => {
-      if (result.payload) {
-  navigate('/');
-}
-});
-};
+    try {
+      const result = await dispatch(register({ name, email, password, role })).unwrap();
+      if (result) {
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
+  };
 
 return (
 <div className="max-w-md mx-auto mt-10">

@@ -16,7 +16,8 @@ export const register = createAsyncThunk(
     try {
       return await authService.register(userData);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      const message = error.response?.data?.message || error.message || 'An error occurred';
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -68,7 +69,7 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.errorMessage = action.payload.message;
+        state.errorMessage = action.payload?.message || 'Registration failed';
         state.user = null;
       })
       .addCase(login.pending, (state) => {

@@ -16,6 +16,7 @@ const CreateClass = () => {
     subjects: []
   });
   const [teachers, setTeachers] = useState([]);
+  const [schedule, setSchedule] = useState([]);
 
   useEffect(() => {
     const fetchTeachers = async () => {
@@ -41,20 +42,42 @@ const CreateClass = () => {
 
   const handleSubjectChange = (index, field, value) => {
     const newSubjects = [...classData.subjects];
-    newSubjects[index][field] = value;
+    newSubjects[index] = { ...newSubjects[index], [field]: value };
     setClassData({ ...classData, subjects: newSubjects });
   };
 
   const addSubject = () => {
     setClassData({
       ...classData,
-      subjects: [...classData.subjects, { name: '', teacher: '' }]
+      subjects: [...classData.subjects, { name: '', teacher: '', schedule: [] }],
     });
   };
 
   const removeSubject = (index) => {
     const newSubjects = classData.subjects.filter((_, i) => i !== index);
     setClassData({ ...classData, subjects: newSubjects });
+  };
+
+  const addScheduleItem = () => {
+    setSchedule([...schedule, { day: '', subjects: [] }]);
+  };
+
+  const updateScheduleItem = (index, field, value) => {
+    const newSchedule = [...schedule];
+    newSchedule[index][field] = value;
+    setSchedule(newSchedule);
+  };
+
+  const addSubjectToSchedule = (scheduleIndex) => {
+    const newSchedule = [...schedule];
+    newSchedule[scheduleIndex].subjects.push({ subject: '', startTime: '', endTime: '' });
+    setSchedule(newSchedule);
+  };
+
+  const updateSubjectInSchedule = (scheduleIndex, subjectIndex, field, value) => {
+    const newSchedule = [...schedule];
+    newSchedule[scheduleIndex].subjects[subjectIndex][field] = value;
+    setSchedule(newSchedule);
   };
 
   const handleSubmit = async (e) => {
@@ -65,26 +88,15 @@ const CreateClass = () => {
     }
 
     for (const subject of classData.subjects) {
-      if (!subject.name || !subject.teacher) {
-        alert('Each subject must have a name and a teacher assigned');
+      if (!subject.name || !subject.teacher || subject.schedule.length === 0) {
+        alert('Each subject must have a name, a teacher assigned, and at least one schedule');
         return;
       }
     }
 
     try {
-      const classDataToSend = {
-        ...classData,
-        batchStartYear: parseInt(classData.batchStartYear),
-        batchEndYear: parseInt(classData.batchEndYear),
-        subjects: classData.subjects.map(subject => ({
-          name: subject.name,
-          teacher: subject.teacher
-        }))
-      };
-      console.log('Sending class data:', JSON.stringify(classDataToSend, null, 2));
-      const result = await dispatch(createClass(classDataToSend)).unwrap();
-      console.log('Class creation result:', result);
-      navigate('/classes');
+      const result = await dispatch(createClass(classData)).unwrap();
+      navigate(`/classes/${result._id}`);
     } catch (error) {
       console.error('Failed to create class:', error);
       alert(`Failed to create class: ${error.message || 'Unknown error'}`);
