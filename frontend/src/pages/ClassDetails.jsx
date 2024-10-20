@@ -177,10 +177,14 @@ const ClassDetails = () => {
         </div>
 
         <h3 className="text-xl font-semibold mt-6 mb-4">Students</h3>
-        <StudentList
-          students={selectedClass.students}
-          onRemoveStudent={handleRemoveStudent}
-        />
+        {selectedClass.students && selectedClass.students.length > 0 ? (
+          <StudentList
+            students={selectedClass.students}
+            onRemoveStudent={handleRemoveStudent}
+          />
+        ) : (
+          <p>No students enrolled in this class.</p>
+        )}
         
         <h3 className="text-xl font-semibold mt-6 mb-4">Add Student</h3>
         <div className="flex mb-4">
