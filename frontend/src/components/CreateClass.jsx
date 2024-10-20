@@ -52,7 +52,7 @@ const CreateClass = () => {
   const addSubject = () => {
     setClassData({
       ...classData,
-      subjects: [...classData.subjects, { name: '', teacher: '', schedule: [] }],
+      subjects: [...classData.subjects, { name: '', teacher: '', schedule: [{ day: '', startTime: '', endTime: '' }] }],
     });
   };
 
@@ -63,6 +63,18 @@ const CreateClass = () => {
 
   const handleStudentChange = (selectedStudents) => {
     setClassData({ ...classData, students: selectedStudents });
+  };
+
+  const handleScheduleChange = (subjectIndex, scheduleIndex, field, value) => {
+    const newSubjects = [...classData.subjects];
+    newSubjects[subjectIndex].schedule[scheduleIndex][field] = value;
+    setClassData({ ...classData, subjects: newSubjects });
+  };
+
+  const addScheduleItem = (subjectIndex) => {
+    const newSubjects = [...classData.subjects];
+    newSubjects[subjectIndex].schedule.push({ day: '', startTime: '', endTime: '' });
+    setClassData({ ...classData, subjects: newSubjects });
   };
 
   const handleSubmit = async (e) => {
@@ -126,6 +138,41 @@ const CreateClass = () => {
                   <option key={teacher._id} value={teacher._id}>{teacher.name}</option>
                 ))}
               </select>
+              <div className="mt-2">
+                <h4 className="text-md font-semibold mb-2">Schedule</h4>
+                {subject.schedule.map((scheduleItem, scheduleIndex) => (
+                  <div key={scheduleIndex} className="flex space-x-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="Day"
+                      value={scheduleItem.day}
+                      onChange={(e) => handleScheduleChange(subjectIndex, scheduleIndex, 'day', e.target.value)}
+                      className="w-1/3 px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="time"
+                      placeholder="Start Time"
+                      value={scheduleItem.startTime}
+                      onChange={(e) => handleScheduleChange(subjectIndex, scheduleIndex, 'startTime', e.target.value)}
+                      className="w-1/3 px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="time"
+                      placeholder="End Time"
+                      value={scheduleItem.endTime}
+                      onChange={(e) => handleScheduleChange(subjectIndex, scheduleIndex, 'endTime', e.target.value)}
+                      className="w-1/3 px-3 py-2 border rounded"
+                    />
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => addScheduleItem(subjectIndex)}
+                  className="mt-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Add Schedule Item
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => removeSubject(subjectIndex)}
