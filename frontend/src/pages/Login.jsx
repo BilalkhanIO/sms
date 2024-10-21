@@ -18,14 +18,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const result = await dispatch(login({ email, password })).unwrap();
-      if (result) {
-        console.log('Login successful, navigating to dashboard');
-        navigate('/dashboard');
-      }
+      await dispatch(login({ email, password })).unwrap();
+      navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
-      // You might want to set an error state here to display to the user
+      // You can set an error state here to display to the user
     }
   };
 

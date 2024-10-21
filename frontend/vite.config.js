@@ -10,7 +10,6 @@ export default defineConfig({
         target: 'https://ideal-broccoli-pp6w74jppw7f5rg-5000.app.github.dev',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   }
