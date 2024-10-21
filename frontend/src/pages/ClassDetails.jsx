@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule } from '../slices/classSlice';
+import { getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule, getStudentDetails, updateClassStudents } from '../slices/classSlice';
 import { logout } from '../slices/authSlice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
@@ -19,8 +19,35 @@ const ClassDetails = () => {
   const [editedSchedule, setEditedSchedule] = useState([]);
 
   useEffect(() => {
-    dispatch(getClassDetails(id));
+    const fetchClassDetails = async () => {
+      try {
+        const classDetails = await dispatch(getClassDetails(id)).unwrap();
+        if (classDetails && classDetails.students) {
+          const studentDetails = await Promise.all(
+            classDetails.students.map(async (studentId) => {
+              try {
+                return await dispatch(getStudentDetails(studentId)).unwrap();
+              } catch (error) {
+                console.error(`Failed to fetch details for student ${studentId}:`, error);
+                return { _id: studentId, name: 'Unknown Student' };
+              }
+            })
+          );
+          dispatch(updateClassStudents({ classId: id, students: studentDetails }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch class details:', error);
+      }
+    };
+    fetchClassDetails();
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (selectedClass) {
+      console.log('Selected class:', selectedClass);
+      console.log('Students in selected class:', selectedClass.students);
+    }
+  }, [selectedClass]);
 
   const handleAddStudent = async () => {
     if (newStudentId) {
@@ -178,10 +205,13 @@ const ClassDetails = () => {
 
         <h3 className="text-xl font-semibold mt-6 mb-4">Students</h3>
         {selectedClass.students && selectedClass.students.length > 0 ? (
-          <StudentList
-            students={selectedClass.students}
-            onRemoveStudent={handleRemoveStudent}
-          />
+          <>
+            {console.log('Rendering StudentList with:', selectedClass.students)}
+            <StudentList
+              students={selectedClass.students}
+              onRemoveStudent={handleRemoveStudent}
+            />
+          </>
         ) : (
           <p>No students enrolled in this class.</p>
         )}

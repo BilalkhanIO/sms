@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://ideal-broccoli-pp6w74jppw7f5rg-5000.app.github.dev',
         changeOrigin: true,
         secure: false,
       }

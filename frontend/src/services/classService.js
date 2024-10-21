@@ -13,7 +13,11 @@ const getClasses = async () => {
 };
 
 const getClassDetails = async (classId) => {
-  const response = await axios.get(API_URL + classId);
+  const token = localStorage.getItem('token');
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+  const response = await axios.get(`${API_URL}/${classId}`, config);
   return response.data;
 };
 
@@ -57,17 +61,23 @@ const updateSchedule = async (classId, schedule) => {
   return response.data;
 };
 
+const createClass = async (classData) => {
+  const token = localStorage.getItem('token');
+  const config = {
+    headers: { Authorization: `Bearer ${token}` }
+  };
+  const response = await axios.post(API_URL, classData, config);
+  return response.data;
+};
+
 const classService = {
   getClasses,
   getClassDetails,
+  createClass,
   addStudent,
   removeStudent,
   addSubject,
-  removeSubject,
-  updateSubject,
-  assignTeacher,
-  removeTeacher,
-  updateSchedule,
+  removeSubject
 };
 
 export default classService;

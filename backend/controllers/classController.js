@@ -2,14 +2,15 @@
 import asyncHandler from 'express-async-handler';
 import Class from '../models/Class.js';
 import mongoose from 'mongoose';
+import User from '../models/User.js';
 
 // @desc    Create a new class
 // @route   POST /api/classes
 // @access  Private (Admin, Teacher)
 const createClass = asyncHandler(async (req, res) => {
-  const { name, description, batchStartYear, batchEndYear, subjects } = req.body;
+  const { name, description, batchStartYear, batchEndYear, subjects, students } = req.body;
 
-  console.log('Received class data:', JSON.stringify({ name, description, batchStartYear, batchEndYear, subjects }, null, 2));
+  console.log('Received class data:', JSON.stringify({ name, description, batchStartYear, batchEndYear, subjects, students }, null, 2));
 
   if (!name || !batchStartYear || !batchEndYear || !subjects || subjects.length === 0) {
     console.log('Validation failed: Missing required fields');
@@ -26,8 +27,6 @@ const createClass = asyncHandler(async (req, res) => {
     throw new Error('Each subject must have a name and a valid teacher ID assigned');
   }
 
-  console.log('Received subjects:', JSON.stringify(subjects, null, 2));
-
   try {
     console.log('Attempting to create new class');
     const newClass = await Class.create({
@@ -36,6 +35,7 @@ const createClass = asyncHandler(async (req, res) => {
       batchStartYear,
       batchEndYear,
       subjects,
+      students
     });
 
     console.log('New class created:', JSON.stringify(newClass, null, 2));
@@ -185,4 +185,16 @@ const updateSchedule = asyncHandler(async (req, res) => {
   res.json(updatedClass);
 });
 
-export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule };
+const getStudentDetails = asyncHandler(async (req, res) => {
+  const studentId = req.params.id;
+  const student = await User.findById(studentId).select('-password');
+  
+  if (student) {
+    res.json(student);
+  } else {
+    res.status(404);
+    throw new Error('Student not found');
+  }
+});
+
+export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule, getStudentDetails };
