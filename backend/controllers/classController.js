@@ -197,4 +197,129 @@ const getStudentDetails = asyncHandler(async (req, res) => {
   }
 });
 
-export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule, getStudentDetails };
+const addCourse = asyncHandler(async (req, res) => {
+  const { classId } = req.params;
+  const { course } = req.body;
+
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $push: { courses: course } },
+    { new: true }
+  ).populate('courses.teacher', 'name');
+
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+
+  res.json(updatedClass);
+});
+
+const removeCourse = asyncHandler(async (req, res) => {
+  const { classId, courseId } = req.params;
+
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $pull: { courses: { _id: courseId } } },
+    { new: true }
+  ).populate('courses.teacher', 'name');
+
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+
+  res.json(updatedClass);
+});
+
+const updateCourse = asyncHandler(async (req, res) => {
+  const { classId, courseId } = req.params;
+  const updates = req.body;
+
+  const updatedClass = await Class.findOneAndUpdate(
+    { _id: classId, 'courses._id': courseId },
+    { $set: { 'courses.$': updates } },
+    { new: true }
+  ).populate('courses.teacher', 'name');
+
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class or course not found');
+  }
+
+  res.json(updatedClass);
+});
+
+const enrollStudent = asyncHandler(async (req, res) => {
+  const { classId } = req.params;
+  const { studentId } = req.body;
+
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $addToSet: { students: studentId } },
+    { new: true }
+  ).populate('students', 'name');
+
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+
+  res.json(updatedClass);
+});
+
+const unenrollStudent = asyncHandler(async (req, res) => {
+  const { classId, studentId } = req.params;
+
+  const updatedClass = await Class.findByIdAndUpdate(
+    classId,
+    { $pull: { students: studentId } },
+    { new: true }
+  ).populate('students', 'name');
+
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+
+  res.json(updatedClass);
+});
+
+const generateReport = asyncHandler(async (req, res) => {
+  const { classId, reportType } = req.params;
+
+  const classData = await Class.findById(classId)
+    .populate('students', 'name')
+    .populate('courses.teacher', 'name');
+
+  if (!classData) {
+    res.status(404);
+    throw new Error('Class not found');
+  }
+
+  let report;
+  switch (reportType) {
+    case 'roster':
+      report = {
+        className: classData.className,
+        students: classData.students.map(student => ({
+          id: student._id,
+          name: student.name
+        })),
+        courses: classData.courses.map(course => ({
+          id: course._id,
+          name: course.name,
+          teacher: course.teacher ? course.teacher.name : 'Unassigned'
+        }))
+      };
+      break;
+    // Add more report types as needed
+    default:
+      res.status(400);
+      throw new Error('Invalid report type');
+  }
+
+  res.json(report);
+});
+
+export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule, getStudentDetails, addCourse, removeCourse, updateCourse, enrollStudent, unenrollStudent, generateReport };

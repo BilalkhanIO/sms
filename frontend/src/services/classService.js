@@ -3,21 +3,22 @@ import axios from 'axios';
 
 const API_URL = '/api/classes/';
 
-const getClasses = async () => {
+const getConfig = () => {
   const token = localStorage.getItem('token');
-  const config = {
-    headers: { Authorization: `Bearer ${token}` }
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   };
-  const response = await axios.get(API_URL, config);
+};
+
+const getClasses = async () => {
+  const response = await axios.get(API_URL, getConfig());
   return response.data;
 };
 
 const getClassDetails = async (classId) => {
-  const token = localStorage.getItem('token');
-  const config = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
-  const response = await axios.get(`${API_URL}/${classId}`, config);
+  const response = await axios.get(`${API_URL}/${classId}`, getConfig());
   return response.data;
 };
 
@@ -62,11 +63,37 @@ const updateSchedule = async (classId, schedule) => {
 };
 
 const createClass = async (classData) => {
-  const token = localStorage.getItem('token');
-  const config = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
-  const response = await axios.post(API_URL, classData, config);
+  const response = await axios.post(API_URL, classData, getConfig());
+  return response.data;
+};
+
+const getStudentDetails = async (studentId) => {
+  const response = await axios.get(`${API_URL}student/${studentId}`, getConfig());
+  return response.data;
+};
+
+const addCourse = async (classId, course) => {
+  const response = await axios.post(`/api/classes/${classId}/courses`, { course });
+  return response.data;
+};
+
+const removeCourse = async (classId, courseId) => {
+  const response = await axios.delete(`/api/classes/${classId}/courses/${courseId}`);
+  return response.data;
+};
+
+const updateCourse = async (classId, courseId, updates) => {
+  const response = await axios.put(`/api/classes/${classId}/courses/${courseId}`, updates);
+  return response.data;
+};
+
+const enrollStudent = async (classId, studentId) => {
+  const response = await axios.post(`/api/classes/${classId}/students`, { studentId });
+  return response.data;
+};
+
+const unenrollStudent = async (classId, studentId) => {
+  const response = await axios.delete(`/api/classes/${classId}/students/${studentId}`);
   return response.data;
 };
 
@@ -77,7 +104,13 @@ const classService = {
   addStudent,
   removeStudent,
   addSubject,
-  removeSubject
+  removeSubject,
+  getStudentDetails,
+  addCourse,
+  removeCourse,
+  updateCourse,
+  enrollStudent,
+  unenrollStudent
 };
 
 export default classService;

@@ -1,82 +1,57 @@
 import React from 'react';
 
-const ScheduleEditor = ({ schedule, subjects, onUpdateSchedule }) => {
-  const addDay = () => {
-    onUpdateSchedule([...schedule, { day: '', subjects: [] }]);
+const ScheduleEditor = ({ schedule, onUpdateSchedule }) => {
+  const addScheduleItem = () => {
+    onUpdateSchedule([...schedule, { dayOfWeek: '', startTime: '', endTime: '', location: '', teachers: [] }]);
   };
 
-  const updateDay = (index, day) => {
+  const updateScheduleItem = (index, field, value) => {
     const newSchedule = [...schedule];
-    newSchedule[index].day = day;
-    onUpdateSchedule(newSchedule);
-  };
-
-  const addSubjectToDay = (dayIndex) => {
-    const newSchedule = [...schedule];
-    newSchedule[dayIndex].subjects.push({ subject: '', startTime: '', endTime: '' });
-    onUpdateSchedule(newSchedule);
-  };
-
-  const updateSubjectInDay = (dayIndex, subjectIndex, field, value) => {
-    const newSchedule = [...schedule];
-    newSchedule[dayIndex].subjects[subjectIndex][field] = value;
+    newSchedule[index][field] = value;
     onUpdateSchedule(newSchedule);
   };
 
   return (
     <div>
-      {schedule.map((day, dayIndex) => (
-        <div key={dayIndex} className="mb-4 p-4 border rounded">
+      {schedule.map((item, index) => (
+        <div key={index} className="mb-4 p-4 border rounded">
           <input
             type="text"
-            value={day.day}
-            onChange={(e) => updateDay(dayIndex, e.target.value)}
+            value={item.dayOfWeek}
+            onChange={(e) => updateScheduleItem(index, 'dayOfWeek', e.target.value)}
             className="w-full px-3 py-2 border rounded mb-2"
-            placeholder="Day"
+            placeholder="Day of Week"
           />
-          {day.subjects.map((subjectSlot, subjectIndex) => (
-            <div key={subjectIndex} className="flex mb-2">
-              <select
-                value={subjectSlot.subject}
-                onChange={(e) => updateSubjectInDay(dayIndex, subjectIndex, 'subject', e.target.value)}
-                className="flex-grow px-3 py-2 border rounded-l"
-              >
-                <option value="">Select a subject</option>
-                {subjects.map((subject) => (
-                  <option key={subject._id} value={subject._id}>{subject.name}</option>
-                ))}
-              </select>
-              <input
-                type="time"
-                value={subjectSlot.startTime}
-                onChange={(e) => updateSubjectInDay(dayIndex, subjectIndex, 'startTime', e.target.value)}
-                className="px-3 py-2 border"
-              />
-              <input
-                type="time"
-                value={subjectSlot.endTime}
-                onChange={(e) => updateSubjectInDay(dayIndex, subjectIndex, 'endTime', e.target.value)}
-                className="px-3 py-2 border rounded-r"
-              />
-            </div>
-          ))}
-          <button
-            onClick={() => addSubjectToDay(dayIndex)}
-            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 mt-2"
-          >
-            Add Subject
-          </button>
+          <input
+            type="time"
+            value={item.startTime}
+            onChange={(e) => updateScheduleItem(index, 'startTime', e.target.value)}
+            className="w-full px-3 py-2 border rounded mb-2"
+          />
+          <input
+            type="time"
+            value={item.endTime}
+            onChange={(e) => updateScheduleItem(index, 'endTime', e.target.value)}
+            className="w-full px-3 py-2 border rounded mb-2"
+          />
+          <input
+            type="text"
+            value={item.location}
+            onChange={(e) => updateScheduleItem(index, 'location', e.target.value)}
+            className="w-full px-3 py-2 border rounded mb-2"
+            placeholder="Location"
+          />
+          {/* Add teacher selection here */}
         </div>
       ))}
       <button
-        onClick={addDay}
-        className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+        onClick={addScheduleItem}
+        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
-        Add Day
+        Add Schedule Item
       </button>
     </div>
   );
 };
 
 export default ScheduleEditor;
-

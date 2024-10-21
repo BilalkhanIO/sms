@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import classService from '../services/classService';
 import { logout } from './authSlice';
 import axios from 'axios';
+import api from '../utils/api';
 
 const initialState = {
   classes: [],
@@ -136,30 +137,100 @@ export const getStudentDetails = createAsyncThunk(
   'class/getStudentDetails',
   async (studentId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`/api/classes/student/${studentId}`);
-      return response.data;
+      return await classService.getStudentDetails(studentId);
     } catch (error) {
-      console.error('Error fetching student details:', error);
-      return rejectWithValue(error.response?.data || 'Failed to fetch student details');
+      return rejectWithValue(error.response.data);
     }
   }
 );
 
 export const updateClassStudents = createAsyncThunk(
   'class/updateClassStudents',
-  async ({ classId, students }, { getState, dispatch }) => {
-    const { selectedClass } = getState().class;
-    if (selectedClass && selectedClass._id === classId) {
-      return { ...selectedClass, students };
+  async ({ classId, students }, { dispatch }) => {
+    const updatedStudents = await Promise.all(
+      students.map(async (studentId) => {
+        const studentDetails = await dispatch(getStudentDetails(studentId)).unwrap();
+        return studentDetails;
+      })
+    );
+    return { classId, students: updatedStudents };
+  }
+);
+
+export const addCourse = createAsyncThunk(
+  'class/addCourse',
+  async ({ classId, course }, { rejectWithValue }) => {
+    try {
+      return await classService.addCourse(classId, course);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
     }
-    return null;
+  }
+);
+
+export const removeCourse = createAsyncThunk(
+  'class/removeCourse',
+  async ({ classId, courseId }, { rejectWithValue }) => {
+    try {
+      return await classService.removeCourse(classId, courseId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateCourse = createAsyncThunk(
+  'class/updateCourse',
+  async ({ classId, courseId, updates }, { rejectWithValue }) => {
+    try {
+      return await classService.updateCourse(classId, courseId, updates);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const enrollStudent = createAsyncThunk(
+  'class/enrollStudent',
+  async ({ classId, studentId }, { rejectWithValue }) => {
+    try {
+      return await classService.enrollStudent(classId, studentId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const unenrollStudent = createAsyncThunk(
+  'class/unenrollStudent',
+  async ({ classId, studentId }, { rejectWithValue }) => {
+    try {
+      return await classService.unenrollStudent(classId, studentId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const generateReport = createAsyncThunk(
+  'class/generateReport',
+  async ({ classId, reportType }, { rejectWithValue }) => {
+    try {
+      return await classService.generateReport(classId, reportType);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
   }
 );
 
 const classSlice = createSlice({
   name: 'class',
   initialState,
-  reducers: {},
+  reducers: {
+    updateClassStudentsSuccess: (state, action) => {
+      state.selectedClass = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getClasses.pending, (state) => {
@@ -202,7 +273,7 @@ const classSlice = createSlice({
       })
       .addCase(addStudent.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.classes.push(action.payload);
+        state.selectedClass = action.payload;
       })
       .addCase(addStudent.rejected, (state, action) => {
         state.isLoading = false;
@@ -213,7 +284,7 @@ const classSlice = createSlice({
       })
       .addCase(removeStudent.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.classes = action.payload;
+        state.selectedClass = action.payload;
       })
       .addCase(removeStudent.rejected, (state, action) => {
         state.isLoading = false;
@@ -242,8 +313,16 @@ const classSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(updateClassStudents.fulfilled, (state, action) => {
-        if (action.payload) {
-          state.selectedClass = action.payload;
+        if (state.selectedClass && state.selectedClass._id === action.payload.classId) {
+          state.selectedClass.students = action.payload.students;
+        }
+      })
+      .addCase(getStudentDetails.fulfilled, (state, action) => {
+        if (state.selectedClass && state.selectedClass.students) {
+          const index = state.selectedClass.students.findIndex(student => student._id === action.payload._id);
+          if (index !== -1) {
+            state.selectedClass.students[index] = action.payload;
+          }
         }
       })
       .addMatcher(
@@ -257,7 +336,31 @@ const classSlice = createSlice({
         (state, action) => {
           state.error = action.payload;
         }
-      );
+      )
+      .addCase(addCourse.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedClass = action.payload;
+      })
+      .addCase(removeCourse.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedClass = action.payload;
+      })
+      .addCase(updateCourse.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedClass = action.payload;
+      })
+      .addCase(enrollStudent.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedClass = action.payload;
+      })
+      .addCase(unenrollStudent.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedClass = action.payload;
+      })
+      .addCase(generateReport.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.selectedClass = action.payload;
+      });
   },
 });
 

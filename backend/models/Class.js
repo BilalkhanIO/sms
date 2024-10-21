@@ -2,32 +2,28 @@
 import mongoose from 'mongoose';
 
 const scheduleSchema = mongoose.Schema({
-  day: { type: String, required: true },
+  dayOfWeek: { type: String, required: true },
   startTime: { type: String, required: true },
   endTime: { type: String, required: true },
+  location: { type: String, required: true },
+  teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
-const subjectSchema = mongoose.Schema({
-  name: { type: String, required: true },
-  teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  schedule: [scheduleSchema],
+const courseSchema = mongoose.Schema({
+  courseName: { type: String, required: true },
+  description: { type: String },
+  teachers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  schedule: [scheduleSchema]
 });
 
 const classSchema = mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
-  batchStartYear: { type: Number, required: true },
-  batchEndYear: { type: Number, required: true },
-  subjects: [subjectSchema],
+  className: { type: String, required: true },
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  schedule: [{
-    day: String,
-    subjects: [{
-      subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject' },
-      startTime: String,
-      endTime: String
-    }]
-  }]
+  courses: [courseSchema],
+  schedule: [scheduleSchema]
+}, {
+  timestamps: true
 });
 
 const Class = mongoose.model('Class', classSchema);
