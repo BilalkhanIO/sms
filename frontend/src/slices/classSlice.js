@@ -223,6 +223,39 @@ export const generateReport = createAsyncThunk(
   }
 );
 
+export const assignCourse = createAsyncThunk(
+  'class/assignCourse',
+  async ({ classId, studentId, courseId }, { rejectWithValue }) => {
+    try {
+      return await classService.assignCourse(classId, studentId, courseId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const unassignCourse = createAsyncThunk(
+  'class/unassignCourse',
+  async ({ classId, studentId, courseId }, { rejectWithValue }) => {
+    try {
+      return await classService.unassignCourse(classId, studentId, courseId);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const updateClass = createAsyncThunk(
+  'class/updateClass',
+  async ({ classId, classData }, { rejectWithValue }) => {
+    try {
+      return await classService.updateClass(classId, classData);
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 const classSlice = createSlice({
   name: 'class',
   initialState,
@@ -325,18 +358,6 @@ const classSlice = createSlice({
           }
         }
       })
-      .addMatcher(
-        (action) => action.type.endsWith('/fulfilled') && action.type !== 'class/getClassDetails/fulfilled',
-        (state, action) => {
-          state.selectedClass = action.payload;
-        }
-      )
-      .addMatcher(
-        (action) => action.type.endsWith('/rejected') && action.type !== 'class/getClassDetails/rejected',
-        (state, action) => {
-          state.error = action.payload;
-        }
-      )
       .addCase(addCourse.fulfilled, (state, action) => {
         state.isLoading = false;
         state.selectedClass = action.payload;
@@ -360,7 +381,34 @@ const classSlice = createSlice({
       .addCase(generateReport.fulfilled, (state, action) => {
         state.isLoading = false;
         state.selectedClass = action.payload;
-      });
+      })
+      .addCase(updateClass.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateClass.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const index = state.classes.findIndex(c => c._id === action.payload._id);
+        if (index !== -1) {
+          state.classes[index] = action.payload;
+        }
+        state.selectedClass = action.payload;
+      })
+      .addCase(updateClass.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addMatcher(
+        (action) => action.type.endsWith('/fulfilled') && action.type !== 'class/getClassDetails/fulfilled',
+        (state, action) => {
+          state.selectedClass = action.payload;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.endsWith('/rejected') && action.type !== 'class/getClassDetails/rejected',
+        (state, action) => {
+          state.error = action.payload;
+        }
+      );
   },
 });
 

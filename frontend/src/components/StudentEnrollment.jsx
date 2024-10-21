@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { enrollStudent, unenrollStudent } from '../slices/classSlice';
+import { enrollStudent, unenrollStudent, assignCourse, unassignCourse } from '../slices/classSlice';
 
 const StudentEnrollment = ({ classId }) => {
   const dispatch = useDispatch();
-  const { students } = useSelector((state) => state.class.selectedClass);
+  const { students, courses } = useSelector((state) => state.class.selectedClass);
   const allStudents = useSelector((state) => state.user.students);
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState('');
 
   const handleEnrollStudent = () => {
     if (selectedStudent) {
@@ -17,6 +18,17 @@ const StudentEnrollment = ({ classId }) => {
 
   const handleUnenrollStudent = (studentId) => {
     dispatch(unenrollStudent({ classId, studentId }));
+  };
+
+  const handleAssignCourse = (studentId) => {
+    if (selectedCourse) {
+      dispatch(assignCourse({ classId, studentId, courseId: selectedCourse }));
+      setSelectedCourse('');
+    }
+  };
+
+  const handleUnassignCourse = (studentId, courseId) => {
+    dispatch(unassignCourse({ classId, studentId, courseId }));
   };
 
   return (
@@ -39,8 +51,27 @@ const StudentEnrollment = ({ classId }) => {
         <h3 className="text-xl font-semibold mb-2">Enrolled Students</h3>
         {students.map((student) => (
           <div key={student._id} className="mb-2">
-            {student.name}
+            <span>{student.name}</span>
             <button onClick={() => handleUnenrollStudent(student._id)} className="ml-2 bg-red-500 text-white px-2 py-1 rounded">Unenroll</button>
+            <select
+              value={selectedCourse}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              className="ml-2 px-2 py-1 border rounded"
+            >
+              <option value="">Assign Course</option>
+              {courses.map((course) => (
+                <option key={course._id} value={course._id}>{course.name}</option>
+              ))}
+            </select>
+            <button onClick={() => handleAssignCourse(student._id)} className="ml-2 bg-blue-500 text-white px-2 py-1 rounded">Assign</button>
+            <div className="ml-4">
+              {student.courses && student.courses.map((course) => (
+                <div key={course._id}>
+                  <span>{course.name}</span>
+                  <button onClick={() => handleUnassignCourse(student._id, course._id)} className="ml-2 bg-yellow-500 text-white px-2 py-1 rounded">Unassign</button>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>

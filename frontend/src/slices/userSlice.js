@@ -6,7 +6,9 @@ const initialState = {
   users: [],
   isLoading: false,
   isError: false,
-  message: ''
+  message: '',
+  teachers: [],
+  error: '',
 };
 
 export const getUsers = createAsyncThunk(
@@ -45,6 +47,17 @@ export const deleteUser = createAsyncThunk('user/delete', async (userId, thunkAP
     return thunkAPI.rejectWithValue(error.response.data);
   }
 });
+
+export const getTeachers = createAsyncThunk(
+  'user/getTeachers',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await userService.getTeachers();
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
 
 const userSlice = createSlice({
   name: 'user',
@@ -94,6 +107,17 @@ const userSlice = createSlice({
       .addCase(deleteUser.rejected, (state, action) => {
         state.isError = true;
         state.message = action.payload?.message || 'Failed to delete user';
+      })
+      .addCase(getTeachers.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getTeachers.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.teachers = action.payload;
+      })
+      .addCase(getTeachers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });

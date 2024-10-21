@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import Class from '../models/Class.js';
 import mongoose from 'mongoose';
 import User from '../models/User.js';
+import Course from '../models/Course.js';
 
 // @desc    Create a new class
 // @route   POST /api/classes
@@ -322,4 +323,43 @@ const generateReport = asyncHandler(async (req, res) => {
   res.json(report);
 });
 
-export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule, getStudentDetails, addCourse, removeCourse, updateCourse, enrollStudent, unenrollStudent, generateReport };
+const getCourses = asyncHandler(async (req, res) => {
+  const courses = await Course.find({}).populate('teacher', 'name');
+  res.json(courses);
+});
+
+const assignCourse = asyncHandler(async (req, res) => {
+  const { classId, studentId, courseId } = req.params;
+
+  const updatedClass = await Class.findOneAndUpdate(
+    { _id: classId, students: studentId, 'courses._id': courseId },
+    { $addToSet: { 'courses.$.students': studentId } },
+    { new: true }
+  ).populate('students', 'name').populate('courses.teacher', 'name');
+
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class, student, or course not found');
+  }
+
+  res.json(updatedClass);
+});
+
+const unassignCourse = asyncHandler(async (req, res) => {
+  const { classId, studentId, courseId } = req.params;
+
+  const updatedClass = await Class.findOneAndUpdate(
+    { _id: classId, students: studentId, 'courses._id': courseId },
+    { $pull: { 'courses.$.students': studentId } },
+    { new: true }
+  ).populate('students', 'name').populate('courses.teacher', 'name');
+
+  if (!updatedClass) {
+    res.status(404);
+    throw new Error('Class, student, or course not found');
+  }
+
+  res.json(updatedClass);
+});
+
+export { createClass, getClasses, getClassDetails, addStudent, removeStudent, addSubject, removeSubject, updateSubject, assignTeacher, removeTeacher, updateSchedule, getStudentDetails, addCourse, removeCourse, updateCourse, enrollStudent, unenrollStudent, generateReport, getCourses, assignCourse, unassignCourse };

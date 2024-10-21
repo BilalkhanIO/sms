@@ -1,7 +1,7 @@
 // services/classService.js
 import axios from 'axios';
 
-const API_URL = '/api/classes/';
+const API_URL = '/api/classes';
 
 const getConfig = () => {
   const token = localStorage.getItem('token');
@@ -97,6 +97,26 @@ const unenrollStudent = async (classId, studentId) => {
   return response.data;
 };
 
+const getCourses = async () => {
+  const response = await axios.get(`${API_URL}courses`, getConfig());
+  return response.data;
+};
+
+const assignCourse = async (classId, studentId, courseId) => {
+  const response = await axios.post(`/api/classes/${classId}/students/${studentId}/courses/${courseId}`);
+  return response.data;
+};
+
+const unassignCourse = async (classId, studentId, courseId) => {
+  const response = await axios.delete(`/api/classes/${classId}/students/${studentId}/courses/${courseId}`);
+  return response.data;
+};
+
+const updateClass = async (classId, classData) => {
+  const response = await axios.put(`/api/classes/${classId}`, classData);
+  return response.data;
+};
+
 const classService = {
   getClasses,
   getClassDetails,
@@ -110,7 +130,11 @@ const classService = {
   removeCourse,
   updateCourse,
   enrollStudent,
-  unenrollStudent
+  unenrollStudent,
+  getCourses,
+  assignCourse,
+  unassignCourse,
+  updateClass
 };
 
 export default classService;

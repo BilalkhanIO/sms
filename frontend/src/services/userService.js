@@ -1,4 +1,5 @@
 import axiosWithAuth from '../utils/axiosWithAuth';
+import axios from 'axios';
 
 const API_URL = '/api/users';
 
@@ -37,11 +38,17 @@ const deleteUser = async (userId) => {
   }
 };
 
+const getTeachers = async () => {
+  const response = await axios.get('/api/users/teachers');
+  return response.data;
+};
+
 const userService = {
   getUsers,
   createUser,
   updateUser,
   deleteUser,
+  getTeachers,
 };
 
 export default userService;

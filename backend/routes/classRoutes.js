@@ -7,7 +7,9 @@ import {
   updateCourse,
   enrollStudent,
   unenrollStudent,
-  generateReport
+  generateReport,
+  assignCourse,
+  unassignCourse
 } from '../controllers/classController.js';
 
 const router = express.Router();
@@ -18,5 +20,7 @@ router.put('/:classId/courses/:courseId', protect, authorize('admin', 'teacher')
 router.post('/:classId/students', protect, authorize('admin', 'teacher'), enrollStudent);
 router.delete('/:classId/students/:studentId', protect, authorize('admin', 'teacher'), unenrollStudent);
 router.get('/:classId/reports/:reportType', protect, authorize('admin', 'teacher'), generateReport);
+router.post('/:classId/students/:studentId/courses/:courseId', protect, authorize('admin', 'teacher'), assignCourse);
+router.delete('/:classId/students/:studentId/courses/:courseId', protect, authorize('admin', 'teacher'), unassignCourse);
 
 export default router;
