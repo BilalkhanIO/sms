@@ -1,13 +1,6 @@
 export { default as Login } from './Login'
 export { default as Register } from './Register'
 export { default as Dashboard } from './Dashboard'
-export { default as Classes } from './Classes'
-export { default as Attendance } from './Attendance'
-export { default as Grades } from './Grades'
-export { default as Exams } from './Exams'
-export { default as Notifications } from './Notifications'
-export { default as Files } from './Files'
-export { default as ClassDetails } from './ClassDetails'
 export { default as Users } from './Users'
 export { default as Home } from './Home'
 

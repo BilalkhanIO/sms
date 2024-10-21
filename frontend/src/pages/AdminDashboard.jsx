@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Chart, RecentActivity, NoticesList } from '../components';
+import { Card, Chart, RecentActivity } from '../components';
 
 const AdminDashboard = ({ data }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -14,7 +14,7 @@ const AdminDashboard = ({ data }) => (
     </Card>
     <Chart title="Attendance Trend" data={data.attendanceTrend} />
     <RecentActivity activities={data.recentActivities} />
-    <NoticesList notices={data.notices} />
+  
   </div>
 );
 

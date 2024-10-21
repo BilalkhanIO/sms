@@ -8,16 +8,10 @@ import {
   Login,
   Register,
   Dashboard,
-  Classes,
-  Exams,
-  Grades,
-  Attendance,
-  Notifications,
   Users,
   Home,
-  ClassDetails,
 } from './pages';
-import CreateClass from './components/CreateClass';
+
 
 function App() {
   const { user, isLoading } = useSelector((state) => state.auth);
@@ -39,16 +33,7 @@ function App() {
               <DashboardLayout>
                 <Routes>
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/classes" element={<Classes />} />
-                  <Route path="/exams" element={<Exams />} />
-                  <Route path="/grades" element={<Grades />} />
-                  {['admin', 'teacher'].includes(user.role) && (
-                    <Route path="/attendance" element={<Attendance />} />
-                  )}
-                  <Route path="/notifications" element={<Notifications />} />
                   {user.role === 'admin' && <Route path="/users" element={<Users />} />}
-                  <Route path="/create-class" element={<CreateClass />} />
-                  <Route path="/classes/:id" element={<ClassDetails />} />
                 </Routes>
               </DashboardLayout>
             </PrivateRoute>
