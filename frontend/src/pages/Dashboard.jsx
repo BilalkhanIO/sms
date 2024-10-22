@@ -1,7 +1,7 @@
 // src/pages/Dashboard.js
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getDashboardData } from '../slices/dashboardSlice';
+import { fetchDashboardData } from '../slices/dashboardSlice';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import AdminDashboard from "./AdminDashboard";
@@ -12,16 +12,20 @@ import ParentDashboard from "./ParentDashboard";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { data, isLoading, error } = useSelector((state) => state.dashboard);
+  const { data, isLoading, error } = useSelector((state) => state.dashboard) || {}; // Add fallback to prevent destructuring error
 
   useEffect(() => {
-    dispatch(getDashboardData());
+    dispatch(fetchDashboardData());
   }, [dispatch]);
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
   const renderDashboard = () => {
+    if (!user || !user.role) {
+      return <ErrorMessage message="User information not available" />;
+    }
+
     switch (user.role) {
       case 'admin':
         return <AdminDashboard data={data} />;
@@ -44,4 +48,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export { Dashboard }; // Ensure this is a default export

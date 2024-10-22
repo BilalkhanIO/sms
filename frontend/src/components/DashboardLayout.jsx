@@ -8,6 +8,7 @@ const DashboardLayout = ({ children }) => {
   const sidebarLinks = [
     { name: 'Dashboard', path: '/', roles: ['admin', 'teacher', 'student', 'parent'] },
     { name: 'Manage Users', path: '/users', roles: ['admin'] },
+    { name: 'Classes', path: '/classes', roles: ['admin', 'teacher'] },
   ];
 
   return (

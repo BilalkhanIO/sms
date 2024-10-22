@@ -1,63 +1,28 @@
 // controllers/userController.js
 import asyncHandler from 'express-async-handler';
 import User from '../models/User.js';
-import bcrypt from 'bcryptjs';
+import generateToken from '../utils/generateToken.js';
 
-const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await User.find({}).select('-password');
-  res.json(users);
-});
+const authUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-const getUserById = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (user) {
-    res.json(user);
-  } else {
-    res.status(404);
-    throw new Error('User not found');
-  }
-});
+  const user = await User.findOne({ email });
 
-const updateUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    user.role = req.body.role || user.role;
-
-    if (req.body.password) {
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(req.body.password, salt);
-    }
-
-    const updatedUser = await user.save();
-
+  if (user && (await user.matchPassword(password))) {
     res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      role: updatedUser.role,
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
     });
   } else {
-    res.status(404);
-    throw new Error('User not found');
+    res.status(401);
+    throw new Error('Invalid email or password');
   }
 });
 
-const deleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-
-  if (user) {
-    await user.remove();
-    res.json({ message: 'User removed' });
-  } else {
-    res.status(404);
-    throw new Error('User not found');
-  }
-});
-
-const createUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, role } = req.body;
 
   const userExists = await User.findOne({ email });
@@ -80,6 +45,7 @@ const createUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      token: generateToken(user._id),
     });
   } else {
     res.status(400);
@@ -87,4 +53,47 @@ const createUser = asyncHandler(async (req, res) => {
   }
 });
 
-export { getAllUsers, getUserById, updateUser, deleteUser, createUser };
+const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (user) {
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      gradeLevel: user.gradeLevel,
+      subjectsTaught: user.subjectsTaught
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.gradeLevel = req.body.gradeLevel || user.gradeLevel;
+    user.subjectsTaught = req.body.subjectsTaught || user.subjectsTaught;
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      gradeLevel: updatedUser.gradeLevel,
+      subjectsTaught: updatedUser.subjectsTaught
+    });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
+export { authUser, registerUser, getUserProfile, updateUserProfile };

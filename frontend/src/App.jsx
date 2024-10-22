@@ -2,7 +2,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import DashboardLayout from './components/DasboardLayout';
+import DashboardLayout from './components/DashboardLayout';
 import PrivateRoute from './components/PrivateRoute';
 import {
   Login,
@@ -10,8 +10,9 @@ import {
   Dashboard,
   Users,
   Home,
+  AttendanceManagement,
+  Classes,
 } from './pages';
-
 
 function App() {
   const { user, isLoading } = useSelector((state) => state.auth);
@@ -34,6 +35,10 @@ function App() {
                 <Routes>
                   <Route path="/dashboard" element={<Dashboard />} />
                   {user.role === 'admin' && <Route path="/users" element={<Users />} />}
+                  {(user.role === 'admin' || user.role === 'teacher') && (
+                    <Route path="/attendance" element={<AttendanceManagement />} />
+                  )}
+                  <Route path="/classes" element={<Classes />} />
                 </Routes>
               </DashboardLayout>
             </PrivateRoute>

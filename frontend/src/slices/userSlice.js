@@ -1,6 +1,7 @@
 // slices/userSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import userService from '../services/userService';
+import axiosWithAuth from '../utils/axiosWithAuth';
 
 const initialState = {
   users: [],
@@ -55,6 +56,18 @@ export const getTeachers = createAsyncThunk(
       return await userService.getTeachers();
     } catch (error) {
       return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getStudentsByCourse = createAsyncThunk(
+  'user/getStudentsByCourse',
+  async (courseId, thunkAPI) => {
+    try {
+      const response = await axiosWithAuth.get(`/api/courses/${courseId}/students`);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
@@ -116,6 +129,17 @@ const userSlice = createSlice({
         state.teachers = action.payload;
       })
       .addCase(getTeachers.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(getStudentsByCourse.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getStudentsByCourse.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.students = action.payload;
+      })
+      .addCase(getStudentsByCourse.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });
