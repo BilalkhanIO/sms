@@ -17,10 +17,16 @@ const createClass = async (classData) => {
   return response.data;
 };
 
+const updateClass = async (classData) => {
+  const response = await axios.put(API_URL + classData._id, classData);
+  return response.data;
+};  
+
 const classService = {
   getClasses,
   deleteClass,
   createClass,
+  updateClass,
 };
 
 export default classService;
