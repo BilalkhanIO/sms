@@ -78,7 +78,7 @@ const deleteClass = asyncHandler(async (req, res) => {
   }
 });
 
-const addStudentToClass = asyncHandler(async (req, res) => {
+const enrollStudentInClass = asyncHandler(async (req, res) => {
   const { classId, studentId } = req.body;
   const classObj = await Class.findById(classId);
   const student = await User.findOne({ _id: studentId, role: 'student' });
@@ -140,4 +140,9 @@ const removeCourseFromClass = asyncHandler(async (req, res) => {
   res.json(classObj);
 });
 
-export { getClasses, getClassById, createClass, updateClass, deleteClass, addStudentToClass, removeStudentFromClass, addCourseToClass, removeCourseFromClass };
+const getAllClasses = asyncHandler(async (req, res) => {
+  const classes = await Class.find({}).populate('teacher', 'name');
+  res.json(classes);
+});
+
+export { getAllClasses, getClasses, getClassById, createClass, updateClass, deleteClass, enrollStudentInClass, removeStudentFromClass, addCourseToClass, removeCourseFromClass };

@@ -46,10 +46,10 @@ const getAttendance = asyncHandler(async (req, res) => {
 // @route   PUT /api/attendance/:id
 // @access  Private/Teacher
 const updateAttendance = asyncHandler(async (req, res) => {
-  const { attendanceId } = req.params;
+  const { id } = req.params;
   const { attendanceList } = req.body;
 
-  const attendance = await Attendance.findById(attendanceId);
+  const attendance = await Attendance.findById(id);
 
   if (!attendance) {
     res.status(404);
@@ -57,9 +57,9 @@ const updateAttendance = asyncHandler(async (req, res) => {
   }
 
   attendance.attendanceList = attendanceList;
-  await attendance.save();
+  const updatedAttendance = await attendance.save();
 
-  res.json(attendance);
+  res.json(updatedAttendance);
 });
 
 const getAttendanceHistory = asyncHandler(async (req, res) => {
@@ -85,4 +85,4 @@ const generateAttendanceReport = asyncHandler(async (req, res) => {
   res.json(report);
 });
 
-export { recordAttendance, getAttendance, updateAttendance, getAttendanceHistory, generateAttendanceReport };
+export { recordAttendance, getAttendance, updateAttendance };

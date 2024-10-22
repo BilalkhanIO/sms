@@ -3,22 +3,32 @@ import {
   assignTeachersToCourse,
   enrollStudentsInCourse,
   createCourse,
-  updateCourse
+  updateCourse,
+  deleteCourse,
+  getCourseById,
+  getAllCourses,
+  getCourses
 } from '../controllers/courseController.js';
-import { protect, admin, authorize } from '../middleware/authMiddleware.js';
+import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/')
-  .post(protect, admin, createCourse);
+  .get(protect, getCourses)
+  .post(protect, authorize('admin'), createCourse);
+
+router.route('/all')
+  .get(protect, authorize('admin'), getAllCourses);
 
 router.route('/:id')
-  .put(protect, admin, updateCourse);
+  .get(protect, getCourseById)
+  .put(protect, authorize('admin'), updateCourse)
+  .delete(protect, authorize('admin'), deleteCourse);
 
 router.route('/:id/teachers')
-  .post(protect, admin, assignTeachersToCourse);
+  .post(protect, authorize('admin'), assignTeachersToCourse);
 
 router.route('/:id/students')
-  .post(protect, admin, enrollStudentsInCourse);
+  .post(protect, authorize('admin'), enrollStudentsInCourse);
 
 export default router;

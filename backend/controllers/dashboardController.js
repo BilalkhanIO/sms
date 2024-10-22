@@ -5,7 +5,6 @@ import Class from '../models/Class.js';
 import Course from '../models/Course.js';
 import Attendance from '../models/Attendance.js';
 import Grade from '../models/Grade.js';
-import Assignment from '../models/Assignment.js';
 import Event from '../models/Event.js';
 import Notice from '../models/Notice.js';
 import Message from '../models/Message.js';

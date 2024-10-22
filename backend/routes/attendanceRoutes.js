@@ -1,5 +1,5 @@
 import express from 'express';
-import { recordAttendance, getAttendance } from '../controllers/attendanceController.js';
+import { recordAttendance, getAttendance, updateAttendance } from '../controllers/attendanceController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -9,5 +9,8 @@ router.route('/')
 
 router.route('/:courseId')
   .get(protect, authorize('teacher', 'admin'), getAttendance);
+
+router.route('/:id')
+  .put(protect, authorize('teacher'), updateAttendance);
 
 export default router;

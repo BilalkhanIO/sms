@@ -2,6 +2,11 @@ import asyncHandler from 'express-async-handler';
 import Course from '../models/Course.js';
 import User from '../models/User.js';
 
+const getAllCourses = asyncHandler(async (req, res) => {
+  const courses = await Course.find({}).populate('teacher', 'name');
+  res.json(courses);
+});
+
 const getCourses = asyncHandler(async (req, res) => {
   const courses = await Course.find({}).populate('teacher', 'name');
   res.json(courses);
@@ -77,7 +82,7 @@ const deleteCourse = asyncHandler(async (req, res) => {
   }
 });
 
-const assignTeachers = asyncHandler(async (req, res) => {
+const assignTeachersToCourse = asyncHandler(async (req, res) => {
   const { teacherIds } = req.body;
   const course = await Course.findById(req.params.id);
 
@@ -92,7 +97,7 @@ const assignTeachers = asyncHandler(async (req, res) => {
   }
 });
 
-const enrollStudents = asyncHandler(async (req, res) => {
+const enrollStudentsInCourse   = asyncHandler(async (req, res) => {
   const { studentIds } = req.body;
   const course = await Course.findById(req.params.id);
 
@@ -122,4 +127,4 @@ const updateCourseSchedule = asyncHandler(async (req, res) => {
   res.json(course);
 });
 
-export { getCourses, getCourseById, createCourse, updateCourse, deleteCourse, assignTeachers, enrollStudents, updateCourseSchedule };
+export { getAllCourses, getCourses, getCourseById, createCourse, updateCourse, deleteCourse, assignTeachersToCourse, enrollStudentsInCourse, updateCourseSchedule };

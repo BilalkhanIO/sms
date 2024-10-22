@@ -1,26 +1,40 @@
 // routes/userRoutes.js
 import express from 'express';
 import {
-  getAllUsers,
+  authUser,
+  registerUser,
+  getUserProfile,
+  updateUserProfile,
+  getUsers,
+  deleteUser,
   getUserById,
   updateUser,
-  deleteUser,
-  createUser,
+  createUser
 } from '../controllers/userController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.use(protect);
-router.use(authorize('admin'));
+// Public routes
+router.post('/login', authUser);
+router.post('/register', registerUser);
 
+// Protected routes
+router.use(protect);
+
+// Admin only routes
 router.route('/')
-  .get(getAllUsers)
-  .post(protect, authorize('admin'), createUser);
+  .get(authorize('admin'), getUsers)
+  .post(authorize('admin'), createUser);
 
 router.route('/:id')
-  .get(getUserById)
-  .put(updateUser)
-  .delete(deleteUser);
+  .get(authorize('admin'), getUserById)
+  .put(authorize('admin'), updateUser)
+  .delete(authorize('admin'), deleteUser);
+
+// User profile routes (accessible by the user themselves)
+router.route('/profile')
+  .get(getUserProfile)
+  .put(updateUserProfile);
 
 export default router;
