@@ -50,7 +50,9 @@ const getAdminDashboardData = async () => {
     { $limit: 10 }
   ]);
 
-  return { totalStudents, totalTeachers, totalClasses, totalCourses, attendanceTrend, performanceOverview };
+  const recentActivities = await Event.find().sort('-createdAt').limit(10);
+
+  return { totalStudents, totalTeachers, totalClasses, totalCourses, attendanceTrend, performanceOverview, recentActivities };
 };
 
 const getTeacherDashboardData = async (teacherId) => {

@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getClasses } from '../slices/classSlice';
 import ClassForm from '../components/ClassForm';
 import CourseForm from '../components/CourseForm';
+import ErrorMessage from '../components/ErrorMessage';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Classes = () => {
   const dispatch = useDispatch();
@@ -23,8 +25,9 @@ const Classes = () => {
     setEditingCourse(course);
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={`Error loading classes: ${error}`} />;
+  if (!Array.isArray(classes) || classes.length === 0) return <div>No classes found.</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -37,7 +40,7 @@ const Classes = () => {
             <button onClick={() => handleEditClass(classItem)} className="text-blue-500">Edit Class</button>
             <h4 className="text-lg font-semibold mt-4">Courses</h4>
             <ul>
-              {classItem.courses.map(course => (
+              {classItem.courses && classItem.courses.map(course => (
                 <li key={course._id}>
                   {course.courseName}
                   <button onClick={() => handleEditCourse(course)} className="text-blue-500 ml-2">Edit Course</button>

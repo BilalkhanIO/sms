@@ -1,17 +1,19 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
-const RecentActivity = ({ activities }) => {
+const RecentActivity = () => {
+  const { recentActivities } = useSelector((state) => state.dashboard);
+
+  if (!recentActivities || recentActivities.length === 0) {
+    return <div>No recent activities</div>;
+  }
+
   return (
-    <div className="recent-activity">
-      <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-      <ul className="space-y-2">
-        {activities.map((activity, index) => (
-          <li key={index} className="bg-gray-100 p-2 rounded">
-            {activity.description}
-            <span className="text-sm text-gray-500 ml-2">
-              {new Date(activity.timestamp).toLocaleString()}
-            </span>
-          </li>
+    <div>
+      <h2>Recent Activities</h2>
+      <ul>
+        {recentActivities.map((activity, index) => (
+          <li key={index}>{activity}</li>
         ))}
       </ul>
     </div>
@@ -19,4 +21,3 @@ const RecentActivity = ({ activities }) => {
 };
 
 export default RecentActivity;
-

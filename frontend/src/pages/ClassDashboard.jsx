@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getClasses, deleteClass } from '../slices/classSlice';
 import { SearchBar, Table, Pagination, ConfirmModal } from '../components';
+import ErrorMessage from '../components/ErrorMessage';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const ClassDashboard = () => {
   const dispatch = useDispatch();
@@ -17,6 +19,10 @@ const ClassDashboard = () => {
   useEffect(() => {
     dispatch(getClasses());
   }, [dispatch]);
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={`Error loading classes: ${error}`} />;
+  if (!Array.isArray(classes) || classes.length === 0) return <div>No classes found.</div>;
 
   const filteredClasses = classes.filter(classItem =>
     classItem.className.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -55,9 +61,6 @@ const ClassDashboard = () => {
     setDeleteModalOpen(false);
     setClassToDelete(null);
   };
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">

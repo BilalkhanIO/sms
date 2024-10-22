@@ -4,8 +4,13 @@ import User from '../models/User.js';
 import Course from '../models/Course.js';
 
 const getClasses = asyncHandler(async (req, res) => {
-  const classes = await Class.find({}).populate('teacher', 'name');
-  res.json(classes);
+  try {
+    const classes = await Class.find({}).populate('teacher', 'name');
+    res.json(classes || []);
+  } catch (error) {
+    console.error('Error fetching classes:', error);
+    res.status(500).json({ message: 'Error fetching classes', error: error.message });
+  }
 });
 
 const getClassById = asyncHandler(async (req, res) => {

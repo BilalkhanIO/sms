@@ -5,7 +5,7 @@ export const getClasses = createAsyncThunk('class/getClasses', async (_, thunkAP
   try {
     return await classService.getClasses();
   } catch (error) {
-    return thunkAPI.rejectWithValue(error.response.data);
+    return thunkAPI.rejectWithValue(error.message || 'An error occurred while fetching classes');
   }
 });
 
@@ -46,14 +46,18 @@ const classSlice = createSlice({
     builder
       .addCase(getClasses.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(getClasses.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.classes = action.payload;
+        state.classes = Array.isArray(action.payload) ? action.payload : [];
+        if (!Array.isArray(action.payload)) {
+          state.error = 'Received invalid data for classes';
+        }
       })
       .addCase(getClasses.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload ? action.payload : 'An error occurred while fetching classes';
       })
       .addCase(deleteClass.fulfilled, (state, action) => {
         state.classes = state.classes.filter(classItem => classItem._id !== action.payload);

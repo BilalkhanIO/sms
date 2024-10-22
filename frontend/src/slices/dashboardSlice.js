@@ -13,14 +13,21 @@ export const fetchDashboardData = createAsyncThunk(
   }
 );
 
+const initialState = {
+  recentActivities: [],
+  data: null, // Ensure this is initialized
+  isLoading: false,
+  error: null,
+};
+
 const dashboardSlice = createSlice({
   name: 'dashboard',
-  initialState: {
-    data: null, // Ensure this is initialized
-    isLoading: false,
-    error: null,
+  initialState,
+  reducers: {
+    setDashboardData: (state, action) => {
+      return { ...state, ...action.payload };
+    },
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchDashboardData.pending, (state) => {
@@ -37,4 +44,5 @@ const dashboardSlice = createSlice({
   },
 });
 
+export const { setDashboardData } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
