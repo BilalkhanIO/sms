@@ -11,7 +11,7 @@ import {
   Users,
   Home,
   AttendanceManagement,
-  Classes,
+  ClassDashboard,
 } from './pages';
 
 function App() {
@@ -38,7 +38,7 @@ function App() {
                   {(user.role === 'admin' || user.role === 'teacher') && (
                     <Route path="/attendance" element={<AttendanceManagement />} />
                   )}
-                  <Route path="/classes" element={<Classes />} />
+                  <Route path="/classes" element={<ClassDashboard />} />
                 </Routes>
               </DashboardLayout>
             </PrivateRoute>
