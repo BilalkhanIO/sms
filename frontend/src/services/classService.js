@@ -1,6 +1,6 @@
 import axiosWithAuth from '../utils/axiosWithAuth';
 
-const API_URL = '/classes/';
+const API_URL = '/api/classes/';
 
 const getClasses = async () => {
   try {
